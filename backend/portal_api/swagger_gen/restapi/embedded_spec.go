@@ -377,36 +377,6 @@ func init() {
         }
       }
     },
-    "/facility/confiureSlot": {
-      "post": {
-        "security": [
-          {
-            "hasRole": [
-              "facility-admin"
-            ]
-          }
-        ],
-        "summary": "configure slot for program in facility",
-        "operationId": "configureSlotFacility",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/FacilityConfigureSlot"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Invalid input"
-          }
-        }
-      }
-    },
     "/facility/groups": {
       "get": {
         "security": [
@@ -679,6 +649,123 @@ func init() {
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "404": {
+            "description": "schedult for given facility and program not found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "hasRole": [
+              "facility-admin"
+            ]
+          }
+        ],
+        "summary": "update schedule for program in facility",
+        "operationId": "updateFacilityProgramSchedule",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Id of facility",
+            "name": "facilityId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Id of program",
+            "name": "programId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appointmentSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityAppointmentSchedule"
+                  },
+                  "x-omitempty": true
+                },
+                "walkInSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityWalkInSchedule"
+                  },
+                  "x-omitempty": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "hasRole": [
+              "facility-admin"
+            ]
+          }
+        ],
+        "summary": "configure slot for program in facility",
+        "operationId": "configureSlotFacility",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Id of facility",
+            "name": "facilityId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Id of program",
+            "name": "programId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appointmentSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityAppointmentSchedule"
+                  }
+                },
+                "walkInSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityWalkInSchedule"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input"
           }
         }
       }
@@ -1175,9 +1262,26 @@ func init() {
     "CreateMedicineRequest": {
       "type": "object",
       "properties": {
+        "doseIntervals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "max": {
+                "type": "integer"
+              },
+              "min": {
+                "type": "integer"
+              },
+              "osid": {
+                "type": "string"
+              }
+            }
+          }
+        },
         "effectiveUntil": {
-          "description": "Effective until n months after the full vaccination schedule is completed",
-          "type": "number"
+          "description": "Effective until n days after the last dose",
+          "type": "integer"
         },
         "name": {
           "type": "string"
@@ -1188,22 +1292,6 @@ func init() {
         },
         "provider": {
           "type": "string"
-        },
-        "schedule": {
-          "type": "object",
-          "properties": {
-            "osid": {
-              "type": "string"
-            },
-            "repeatInterval": {
-              "description": "Number of times the vaccination should be taken.",
-              "type": "number"
-            },
-            "repeatTimes": {
-              "description": "How many times vaccination should be taken",
-              "type": "number"
-            }
-          }
         },
         "status": {
           "type": "string",
@@ -1393,10 +1481,6 @@ func init() {
     },
     "FacilityConfigureSlot": {
       "type": "object",
-      "required": [
-        "facilityId",
-        "programId"
-      ],
       "properties": {
         "appointmentSchedule": {
           "type": "array",
@@ -2342,36 +2426,6 @@ func init() {
         }
       }
     },
-    "/facility/confiureSlot": {
-      "post": {
-        "security": [
-          {
-            "hasRole": [
-              "facility-admin"
-            ]
-          }
-        ],
-        "summary": "configure slot for program in facility",
-        "operationId": "configureSlotFacility",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/FacilityConfigureSlot"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Invalid input"
-          }
-        }
-      }
-    },
     "/facility/groups": {
       "get": {
         "security": [
@@ -2644,6 +2698,123 @@ func init() {
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "404": {
+            "description": "schedult for given facility and program not found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "hasRole": [
+              "facility-admin"
+            ]
+          }
+        ],
+        "summary": "update schedule for program in facility",
+        "operationId": "updateFacilityProgramSchedule",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Id of facility",
+            "name": "facilityId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Id of program",
+            "name": "programId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appointmentSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityAppointmentSchedule"
+                  },
+                  "x-omitempty": true
+                },
+                "walkInSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityWalkInSchedule"
+                  },
+                  "x-omitempty": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "hasRole": [
+              "facility-admin"
+            ]
+          }
+        ],
+        "summary": "configure slot for program in facility",
+        "operationId": "configureSlotFacility",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Id of facility",
+            "name": "facilityId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Id of program",
+            "name": "programId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appointmentSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityAppointmentSchedule"
+                  }
+                },
+                "walkInSchedule": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FacilityWalkInSchedule"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input"
           }
         }
       }
@@ -3140,9 +3311,15 @@ func init() {
     "CreateMedicineRequest": {
       "type": "object",
       "properties": {
+        "doseIntervals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CreateMedicineRequestDoseIntervalsItems0"
+          }
+        },
         "effectiveUntil": {
-          "description": "Effective until n months after the full vaccination schedule is completed",
-          "type": "number"
+          "description": "Effective until n days after the last dose",
+          "type": "integer"
         },
         "name": {
           "type": "string"
@@ -3153,22 +3330,6 @@ func init() {
         },
         "provider": {
           "type": "string"
-        },
-        "schedule": {
-          "type": "object",
-          "properties": {
-            "osid": {
-              "type": "string"
-            },
-            "repeatInterval": {
-              "description": "Number of times the vaccination should be taken.",
-              "type": "number"
-            },
-            "repeatTimes": {
-              "description": "How many times vaccination should be taken",
-              "type": "number"
-            }
-          }
         },
         "status": {
           "type": "string",
@@ -3188,19 +3349,17 @@ func init() {
         }
       }
     },
-    "CreateMedicineRequestSchedule": {
+    "CreateMedicineRequestDoseIntervalsItems0": {
       "type": "object",
       "properties": {
+        "max": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
+        },
         "osid": {
           "type": "string"
-        },
-        "repeatInterval": {
-          "description": "Number of times the vaccination should be taken.",
-          "type": "number"
-        },
-        "repeatTimes": {
-          "description": "How many times vaccination should be taken",
-          "type": "number"
         }
       }
     },
@@ -3410,10 +3569,6 @@ func init() {
     },
     "FacilityConfigureSlot": {
       "type": "object",
-      "required": [
-        "facilityId",
-        "programId"
-      ],
       "properties": {
         "appointmentSchedule": {
           "type": "array",
