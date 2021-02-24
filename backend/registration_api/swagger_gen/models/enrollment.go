@@ -38,9 +38,6 @@ type Enrollment struct {
 	// code
 	Code string `json:"code,omitempty"`
 
-	// comorbidities
-	Comorbidities []string `json:"comorbidities"`
-
 	// dob
 	// Format: date
 	Dob strfmt.Date `json:"dob,omitempty"`

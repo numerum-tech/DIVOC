@@ -600,12 +600,6 @@ func init() {
         "code": {
           "type": "string"
         },
-        "comorbidities": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "dob": {
           "type": "string",
           "format": "date"

@@ -65,12 +65,6 @@
           "$id": "#/properties/address",
           "$ref": "Common.json#/definitions/Address",
           "title": "Address"
-        },
-        "comorbidities": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     }
