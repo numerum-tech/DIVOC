@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/divoc/kernel_library/model"
 	kernelService "github.com/divoc/kernel_library/services"
 	"github.com/divoc/registration-api/config"
@@ -9,10 +10,11 @@ import (
 	models2 "github.com/divoc/registration-api/pkg/models"
 	"github.com/divoc/registration-api/pkg/services"
 	"github.com/divoc/registration-api/pkg/utils"
+	models3 "github.com/divoc/registration-api/swagger_gen/models"
 	"github.com/divoc/registration-api/swagger_gen/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
-	"strings"
+	"strconv"
 	"time"
 )
 
@@ -20,7 +22,6 @@ const FacilityEntity = "Facility"
 const EnrollmentEntity = "Enrollment"
 const LastInitializedKey = "LAST_FACILITY_SLOTS_INITIALIZED"
 const YYYYMMDD = "2006-01-02"
-const SlotsToReturn = 100
 
 var DaysMap = map[string]time.Weekday{
 	"Su": time.Sunday,
@@ -40,22 +41,13 @@ func SetupHandlers(api *operations.RegistrationAPIAPI) {
 	api.InitializeFacilitySlotsHandler = operations.InitializeFacilitySlotsHandlerFunc(initializeFacilitySlots)
 	api.GetSlotsForFacilitiesHandler = operations.GetSlotsForFacilitiesHandlerFunc(getFacilitySlots)
 	api.BookSlotOfFacilityHandler = operations.BookSlotOfFacilityHandlerFunc(bookSlot)
+	api.DeleteAppointmentHandler = operations.DeleteAppointmentHandlerFunc(deleteAppointment)
 }
 
-func getRecipients(params operations.GetRecipientsParams) middleware.Responder {
-	recipientToken := params.HTTPRequest.Header.Get("recipientToken")
-	if recipientToken == "" {
-		log.Error("Recipient Token is empty")
-		return operations.NewGetRecipientsUnauthorized()
-	}
-	phone, err := services.VerifyRecipientToken(recipientToken)
-	if err != nil {
-		log.Error("Error occurred while verifying the token ", err)
-		return operations.NewGetRecipientsUnauthorized()
-	}
+func getRecipients(params operations.GetRecipientsParams, principal *models3.JWTClaimBody) middleware.Responder {
 	filter := map[string]interface{}{}
 	filter["phone"] = map[string]interface{}{
-		"eq": phone,
+		"eq": principal.Phone,
 	}
 	responseFromRegistry, err := kernelService.QueryRegistry(EnrollmentEntity, filter, 100, 0)
 	if err != nil {
@@ -78,18 +70,8 @@ func getRecipients(params operations.GetRecipientsParams) middleware.Responder {
 	}
 }
 
-func enrollRecipient(params operations.EnrollRecipientParams) middleware.Responder {
-	recipientToken := params.HTTPRequest.Header.Get("recipientToken")
-	if recipientToken == "" {
-		log.Error("Recipient Token is empty")
-		return operations.NewEnrollRecipientUnauthorized()
-	}
-	phone, err := services.VerifyRecipientToken(recipientToken)
-	if err != nil {
-		log.Error("Error occurred while verifying the token ", err)
-		return operations.NewEnrollRecipientUnauthorized()
-	}
-	params.Body.Phone = phone
+func enrollRecipient(params operations.EnrollRecipientParams, principal *models3.JWTClaimBody) middleware.Responder {
+	params.Body.Phone = principal.Phone
 	if recipientData, err := json.Marshal(params.Body); err == nil {
 		log.Info("Received Recipient data to enroll", string(recipientData), params.Body)
 		services.PublishEnrollmentMessage(recipientData)
@@ -231,7 +213,7 @@ func initializeFacilitySlots(params operations.InitializeFacilitySlotsParams) mi
 														startTime := programSchedule["startTime"]
 														endTime := programSchedule["endTime"]
 														maxAppointments := programSchedule["maxAppointments"]
-														schedule := services.FacilitySchedule{
+														schedule := models2.FacilitySchedule{
 															FacilityCode: facilityCode,
 															ProgramId:    programId,
 															Date:         slotDate,
@@ -258,12 +240,12 @@ func initializeFacilitySlots(params operations.InitializeFacilitySlotsParams) mi
 	return operations.NewInitializeFacilitySlotsUnauthorized()
 }
 
-func getFacilitySlots(paras operations.GetSlotsForFacilitiesParams) middleware.Responder {
+func getFacilitySlots(paras operations.GetSlotsForFacilitiesParams, principal *models3.JWTClaimBody) middleware.Responder {
 	if paras.FacilityID == nil {
 		return operations.NewGenerateOTPBadRequest()
 	}
-	startPosition := int64(*paras.PageNumber) * SlotsToReturn
-	slotKeys, err := services.GetValuesFromSet(*paras.FacilityID, startPosition, startPosition+SlotsToReturn-1)
+	startPosition := int64(*paras.PageNumber) * int64(*paras.PageSize)
+	slotKeys, err := services.GetValuesFromSet(*paras.FacilityID, startPosition, startPosition+int64(*paras.PageSize)-1)
 	if err == nil && len(slotKeys) > 0 {
 		slotsAvailable, err := services.GetValues(slotKeys...)
 		if err == nil {
@@ -278,75 +260,118 @@ func getFacilitySlots(paras operations.GetSlotsForFacilitiesParams) middleware.R
 	return operations.NewGetSlotsForFacilitiesBadRequest()
 }
 
-func bookSlot(params operations.BookSlotOfFacilityParams) middleware.Responder {
-	recipientToken := params.HTTPRequest.Header.Get("recipientToken")
+func bookSlot(params operations.BookSlotOfFacilityParams, principal *models3.JWTClaimBody) middleware.Responder {
 	if params.Body.EnrollmentCode == nil || params.Body.FacilitySlotID == nil {
 		return operations.NewBookSlotOfFacilityBadRequest()
 	}
-	if recipientToken == "" {
-		log.Error("Recipient Token is empty")
-		return operations.NewGetRecipientsUnauthorized()
-	}
-	phone, err := services.VerifyRecipientToken(recipientToken)
-	if err != nil {
-		log.Error("Invalid Token")
-		return operations.NewGetRecipientsUnauthorized()
-	}
-	if isValidEnrollmentCode(*params.Body.EnrollmentCode, phone) {
-		if !checkIfAlreadyAppointed(*params.Body.EnrollmentCode) {
+
+	enrollmentInfo := getEnrollmentInfoIfValid(*params.Body.EnrollmentCode, principal.Phone)
+	if enrollmentInfo != nil {
+		if !checkIfAlreadyAppointed(enrollmentInfo) {
 			err := services.BookAppointmentSlot(*params.Body.FacilitySlotID)
 			if err != nil {
 				return operations.NewBookSlotOfFacilityBadRequest()
 			} else {
-				isMarked := services.MarkEnrollmentCodeAsBooked(*params.Body.EnrollmentCode, *params.Body.FacilitySlotID)
+				isMarked := services.MarkEnrollmentAsBooked(*params.Body.EnrollmentCode, *params.Body.FacilitySlotID)
 				if isMarked {
-					facilityDetails := strings.Split(*params.Body.FacilitySlotID, "_")
+					facilitySchedule := models2.ToFacilitySchedule(*params.Body.FacilitySlotID)
 					services.PublishAppointmentAcknowledgement(models2.AppointmentAck{
 						EnrollmentCode:  *params.Body.EnrollmentCode,
 						SlotID:          *params.Body.FacilitySlotID,
-						FacilityCode:    facilityDetails[0],
-						AppointmentDate: facilityDetails[2],
-						AppointmentTime: facilityDetails[3] + "-" + facilityDetails[4],
+						FacilityCode:    facilitySchedule.FacilityCode,
+						AppointmentDate: facilitySchedule.DateString(),
+						AppointmentTime: facilitySchedule.Time,
 						CreatedAt:       time.Now(),
+						Status:          models2.AllottedStatus,
 					})
 
 					return operations.NewGetSlotsForFacilitiesOK()
 				}
 			}
 		} else {
-			log.Errorf("Already booked %s, %s", *params.Body.EnrollmentCode, phone)
+			log.Errorf("Already booked %s, %s", *params.Body.EnrollmentCode, principal.Phone)
 		}
 	} else {
-		log.Errorf("Invalid booking request %s, %s", *params.Body.EnrollmentCode, phone)
+		log.Errorf("Invalid booking request %s, %s", *params.Body.EnrollmentCode, principal.Phone)
 	}
 	return operations.NewGetSlotsForFacilitiesBadRequest()
 }
 
-func checkIfAlreadyAppointed(enrollmentCode string) bool {
-	exists, err := services.HashFieldExists(enrollmentCode, "slotId")
-	if err != nil {
-		return false
-	} else {
-		return exists
-	}
-}
-
-func isValidEnrollmentCode(enrollmentCode string, phone string) bool {
-	//TODO: check in cache, store the registered enrolled users in cache as map
-	filter := map[string]interface{}{
-		"code": map[string]interface{}{
-			"eq": enrollmentCode,
-		},
-		"phone": map[string]interface{}{
-			"eq": phone,
-		},
-	}
-	enrollmentsArr, err := kernelService.QueryRegistry(EnrollmentEntity, filter, 100, 0)
-	if err == nil {
-		enrollments := enrollmentsArr[EnrollmentEntity].([]interface{})
-		if len(enrollments) > 0 {
-			return true
-		}
+func checkIfAlreadyAppointed(enrollmentInfo map[string]string) bool {
+	if _, ok := enrollmentInfo["slotId"]; ok {
+		return true
 	}
 	return false
+}
+
+func getEnrollmentInfoIfValid(enrollmentCode string, phone string) map[string]string {
+	values, err := services.GetHashValues(enrollmentCode)
+	if err == nil {
+		if val, ok := values["phone"]; ok && val == phone {
+			return values
+		}
+	}
+	return nil
+}
+
+func deleteAppointment(params operations.DeleteAppointmentParams, principal *models3.JWTClaimBody) middleware.Responder {
+	if params.Body.EnrollmentCode == nil {
+		return operations.NewDeleteAppointmentBadRequest()
+	}
+
+	enrollmentInfo := getEnrollmentInfoIfValid(*params.Body.EnrollmentCode, principal.Phone)
+	if enrollmentInfo != nil {
+		if checkIfAlreadyAppointed(enrollmentInfo) {
+			if msg := checkIfCancellationAllowed(enrollmentInfo); msg == "" {
+				lastBookedSlotId := enrollmentInfo["slotId"]
+				err := services.CancelBookedAppointment(lastBookedSlotId)
+				if err != nil {
+					return operations.NewDeleteAppointmentBadRequest()
+				} else {
+					isMarked := services.RevokeEnrollmentBookedStatus(*params.Body.EnrollmentCode)
+					if isMarked {
+						services.PublishAppointmentAcknowledgement(models2.AppointmentAck{
+							EnrollmentCode:  *params.Body.EnrollmentCode,
+							SlotID:          "",
+							FacilityCode:    "",
+							AppointmentDate: "0001-01-01",
+							AppointmentTime: "",
+							CreatedAt:       time.Now(),
+							Status:          models2.CancelledStatus,
+						})
+						return operations.NewDeleteAppointmentOK()
+					}
+				}
+			} else {
+				log.Errorf("Cancellation of appointment not allowed %v", msg)
+				response := operations.NewDeleteAppointmentBadRequest()
+				response.Payload = &operations.DeleteAppointmentBadRequestBody{
+					Message: msg,
+				}
+				return response
+			}
+		} else {
+			log.Errorf("Enrollment not booked %s, %s", *params.Body.EnrollmentCode, principal.Phone)
+		}
+	} else {
+		log.Errorf("Invalid booking request %s, %s", *params.Body.EnrollmentCode, principal.Phone)
+	}
+	return operations.NewDeleteAppointmentBadRequest()
+}
+
+func checkIfCancellationAllowed(enrollmentInfo map[string]string) string {
+	lastBookedSlotId := enrollmentInfo["slotId"]
+	facilitySchedule := models2.ToFacilitySchedule(lastBookedSlotId)
+	remainingHoursForSchedule := facilitySchedule.Date.Sub(time.Now()).Hours()
+	if remainingHoursForSchedule <= 0 {
+		return fmt.Sprintf("Cancellation is not allowed")
+	}
+	if remainingHoursForSchedule <= float64(config.Config.MinCancellationHours) {
+		return fmt.Sprintf("Cancellation before %d hours is not allowed", config.Config.MinCancellationHours)
+	}
+	updatedCount, _ := strconv.Atoi(enrollmentInfo["updatedCount"])
+	if updatedCount >= config.Config.MaxAppointmentUpdatesAllowed {
+		return fmt.Sprintf("You have reached the maximum number of times to update appointment")
+	}
+	return ""
 }
