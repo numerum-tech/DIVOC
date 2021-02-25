@@ -6,6 +6,7 @@ registry:
 keycloak:
   url: https://divoc.togosafe.gouv.tg/keycloak/auth
   realm: divoc
+  pubkey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoV9jMzgQTHgDKKK2cqXskOezYpEBrT7mhy6abSUJIMrq8mLQG4DVyhotihMmLqdqei2FjsTaiBWwyBEBJzrY3WuxTKkuUr9dKRXpoCDtR+QLmN6a6vjS7Dl/rQ3JLRTZwnCPJP1l0ZeUCenajPczceUm27SNUnsJSXgKC82bIwa5pz3HS/M4Eqjy26WIspJhI5BbvuEcI1CHtr8Eeb+iU2d8WCcH8Z3UP9XBtmAkdhDFSz9snIBmu4pJuYbuNCG0qSqiQ0A6MNiqc85NDDbfUFGIP0wsUKl/R+hEiFppgnVoJ7agDzL38TrHGpLVY1VcL+olzDR84y1g8gC+Dumr7wIDAQAB
   facilityAdmin:
     roleName: facility-admin
     roleId: 9da3a031-0c76-4077-9176-facfe70b12bc
