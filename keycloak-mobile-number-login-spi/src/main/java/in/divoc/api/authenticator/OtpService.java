@@ -2,10 +2,11 @@ package in.divoc.api.authenticator;
 
 import org.jboss.logging.Logger;
 
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.RequestBody;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
 
 import java.util.Random;
 
@@ -43,7 +44,7 @@ class OtpService {
                 .post(formBody)
                 .build();
 
-        HttpClient httpClient = HttpClient.newHttpClient();
+        OkHttpClient httpClient = new OkHttpClient();
 
         try (Response response = httpClient.newCall(request).execute()) {
 
