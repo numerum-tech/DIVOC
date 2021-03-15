@@ -54,7 +54,7 @@ func (facilityCsv FacilityCSV) CreateCsvUpload() error {
 		WebsiteURL:         data.Text("websiteURL"),
 		Programs:           []*models.FacilityProgramsItems0{},
 	}
-	err = services.CreateNewRegistry(facility, "Facility")
+	_, err = services.CreateNewRegistry(facility, "Facility")
 	if err != nil {
 		errmsg := err.Error()
 		if strings.Contains(errmsg, "Detail:") {
@@ -81,7 +81,7 @@ func (facilityCsv FacilityCSV) CreateCsvUpload() error {
 		}
 
 		resp, err := CreateKeycloakUser(userRequest)
-		log.Infof("Create keycloak user %+v", resp)
+		log.Debugf("Create keycloak user %+v", resp)
 		if err != nil || !isUserCreatedOrAlreadyExists(resp) {
 			log.Errorf("Error while creating keycloak user : %s", admin)
 		} else {

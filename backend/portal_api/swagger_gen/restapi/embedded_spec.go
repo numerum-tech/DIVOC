@@ -324,19 +324,25 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "facilityId": {
+              "type": "object",
+              "required": [
+                "message",
+                "facilities"
+              ],
+              "properties": {
+                "facilities": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
                     "type": "string"
-                  },
-                  "pendingTasks": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
                   }
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 5
+                },
+                "subject": {
+                  "type": "string"
                 }
               }
             }
@@ -766,6 +772,9 @@ func init() {
           },
           "400": {
             "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -1264,7 +1273,7 @@ func init() {
           "type": "string"
         },
         "pincode": {
-          "type": "integer"
+          "type": "string"
         },
         "state": {
           "description": "State of address",
@@ -1280,7 +1289,7 @@ func init() {
           "addressLine1": "no. 23, some lane, some road",
           "addressLine2": "some nagar",
           "district": "bangalore south",
-          "pincode": 560000,
+          "pincode": "560000",
           "state": "Karnataka"
         }
       ]
@@ -2410,9 +2419,26 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/NotifyFacilitiesParamsBodyItems0"
+              "type": "object",
+              "required": [
+                "message",
+                "facilities"
+              ],
+              "properties": {
+                "facilities": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 5
+                },
+                "subject": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -2841,6 +2867,9 @@ func init() {
           },
           "400": {
             "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -3339,7 +3368,7 @@ func init() {
           "type": "string"
         },
         "pincode": {
-          "type": "integer"
+          "type": "string"
         },
         "state": {
           "description": "State of address",
@@ -3355,7 +3384,7 @@ func init() {
           "addressLine1": "no. 23, some lane, some road",
           "addressLine2": "some nagar",
           "district": "bangalore south",
-          "pincode": 560000,
+          "pincode": "560000",
           "state": "Karnataka"
         }
       ]
@@ -3444,7 +3473,7 @@ func init() {
           "$id": "#/properties/address/properties/district"
         },
         "pincode": {
-          "type": "integer",
+          "type": "string",
           "title": "The pincode schema",
           "$id": "#/properties/address/properties/pincode"
         },
@@ -3463,10 +3492,35 @@ func init() {
           "addressLine1": "no. 23, some lane, some road",
           "addressLine2": "some nagar",
           "district": "bangalore south",
-          "pincode": 560000,
+          "pincode": "560000",
           "state": "Karnataka"
         }
       ]
+    },
+    "EnrollmentAppointmentsItems0": {
+      "type": "object",
+      "properties": {
+        "appointmentDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "appointmentSlot": {
+          "type": "string"
+        },
+        "certified": {
+          "type": "boolean",
+          "default": false
+        },
+        "dose": {
+          "type": "string"
+        },
+        "enrollmentScopeId": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string"
+        }
+      }
     },
     "Error": {
       "type": "object",
@@ -3830,20 +3884,6 @@ func init() {
         },
         "startTime": {
           "type": "string"
-        }
-      }
-    },
-    "NotifyFacilitiesParamsBodyItems0": {
-      "type": "object",
-      "properties": {
-        "facilityId": {
-          "type": "string"
-        },
-        "pendingTasks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -4288,8 +4328,7 @@ func init() {
     "enrollment": {
       "type": "object",
       "required": [
-        "nationalId",
-        "dob"
+        "nationalId"
       ],
       "properties": {
         "address": {
@@ -4321,7 +4360,7 @@ func init() {
               "$id": "#/properties/address/properties/district"
             },
             "pincode": {
-              "type": "integer",
+              "type": "string",
               "title": "The pincode schema",
               "$id": "#/properties/address/properties/pincode"
             },
@@ -4340,36 +4379,34 @@ func init() {
               "addressLine1": "no. 23, some lane, some road",
               "addressLine2": "some nagar",
               "district": "bangalore south",
-              "pincode": 560000,
+              "pincode": "560000",
               "state": "Karnataka"
             }
           ]
         },
-        "appointmentDate": {
-          "type": "string",
-          "format": "date"
-        },
-        "appointmentSlot": {
-          "type": "string"
+        "appointments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnrollmentAppointmentsItems0"
+          }
         },
         "beneficiaryPhone": {
           "type": "string"
         },
-        "certified": {
-          "type": "boolean",
-          "default": false
-        },
         "code": {
           "type": "string"
+        },
+        "comorbidities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "dob": {
           "type": "string",
           "format": "date"
         },
         "email": {
-          "type": "string"
-        },
-        "enrollmentScopeId": {
           "type": "string"
         },
         "gender": {
@@ -4389,8 +4426,8 @@ func init() {
         "phone": {
           "type": "string"
         },
-        "programId": {
-          "type": "string"
+        "yob": {
+          "type": "integer"
         }
       }
     },

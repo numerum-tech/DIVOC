@@ -53,7 +53,7 @@ func SetupHandlers(api *operations.DivocPortalAPIAPI) {
 	api.GetEnrollmentsUploadsErrorsHandler = operations.GetEnrollmentsUploadsErrorsHandlerFunc(getPreEnrollmentUploadErrorsHandler)
 	api.GetVaccinatorsUploadHistoryHandler = operations.GetVaccinatorsUploadHistoryHandlerFunc(getVaccinatorUploadHandler)
 	api.GetVaccinatorsUploadsErrorsHandler = operations.GetVaccinatorsUploadsErrorsHandlerFunc(getVaccinatorUploadErrorsHandler)
-	api.NotifyFacilitiesHandler = operations.NotifyFacilitiesHandlerFunc(services.NotifyFacilitiesPendingTasks)
+	api.NotifyFacilitiesHandler = operations.NotifyFacilitiesHandlerFunc(services.NotifyFacilities)
 	api.UpdateFacilityUserHandler = operations.UpdateFacilityUserHandlerFunc(updateFacilityUserHandler)
 	api.DeleteFacilityUserHandler = operations.DeleteFacilityUserHandlerFunc(deleteFacilityUserHandler)
 	api.CreateVaccinatorHandler = operations.CreateVaccinatorHandlerFunc(createVaccinatorHandler)
@@ -226,7 +226,7 @@ func getFacilitiesForPublic(params operations.GetFacilitiesForPublicParams) midd
 	filter := make(map[string]interface{})
 	if params.Pincode != nil {
 		filter[FacilityPincodekey] = map[string]interface{}{
-			"eq": *params.Pincode,
+			"startsWith": *params.Pincode,
 		}
 	}
 	limit, offset := getLimitAndOffset(params.Limit, params.Offset)
@@ -249,6 +249,14 @@ func getFacilitiesForPublic(params operations.GetFacilitiesForPublicParams) midd
 	var facilityIds []string
 	for _, facility := range facilities {
 		facilityIds = append(facilityIds, facility.Osid)
+	}
+	filter = map[string]interface{}{
+		"facilityId": map[string]interface{}{
+			"or": facilityIds,
+		},
+		"osCreatedAt": map[string]interface{}{
+			"lt": time.Now().Format("2006-01-02"),
+		},
 	}
 	facilitySlotsResponse, err2 := kernelService.QueryRegistry("FacilityProgramSlot", filter, limit, offset)
 	responseData := map[string]interface{}{
@@ -476,7 +484,7 @@ func getFacilityUserHandler(params operations.GetFacilityUsersParams, principal 
 	var err error
 	if HasResourceRole(portalClientId, "facility-admin", principal) {
 		users, err = GetFacilityUsers(params.HTTPRequest.Header.Get("Authorization"))
-	}else if HasResourceRole(portalClientId, "controller", principal) && params.FacilityCode != nil {
+	} else if HasResourceRole(portalClientId, "controller", principal) && params.FacilityCode != nil {
 		users, err = GetUsersByFacilityCode(*params.FacilityCode)
 	} else {
 		return operations.NewCreateFacilityUsersBadRequest()
@@ -511,12 +519,12 @@ func updateFacilitiesHandler(params operations.UpdateFacilitiesParams, principal
 				addressOsid := (facility["address"].(map[string]interface{}))["osid"]
 				if updateRequest.Address != nil {
 					updatedFacility["address"] = map[string]interface{}{
-						"osid": addressOsid,
+						"osid":         addressOsid,
 						"addressLine1": *updateRequest.Address.AddressLine1,
 						"addressLine2": *updateRequest.Address.AddressLine2,
-						"district": *updateRequest.Address.District,
-						"state": *updateRequest.Address.State,
-						"pincode": *updateRequest.Address.Pincode,
+						"district":     *updateRequest.Address.District,
+						"state":        *updateRequest.Address.State,
+						"pincode":      *updateRequest.Address.Pincode,
 					}
 				}
 				utils.SetMapValueIfNotEmpty(updatedFacility, "facilityName", updateRequest.FacilityName)
@@ -543,7 +551,7 @@ func updateFacilitiesHandler(params operations.UpdateFacilitiesParams, principal
 
 func updateFacilityProgramsData(facility map[string]interface{}, updateRequest *models.FacilityUpdateRequestItems0) map[string]interface{} {
 
-	mkSchedule := func (p models.FacilityUpdateRequestItems0ProgramsItems0Schedule) map[string]interface{} {
+	mkSchedule := func(p models.FacilityUpdateRequestItems0ProgramsItems0Schedule) map[string]interface{} {
 		s := map[string]interface{}{}
 		utils.SetMapValueIfNotEmpty(s, "startTime", p.StartTime)
 		utils.SetMapValueIfNotEmpty(s, "endTime", p.EndTime)
@@ -553,8 +561,8 @@ func updateFacilityProgramsData(facility map[string]interface{}, updateRequest *
 		return s
 	}
 
-	mkProgram := func (p *models.FacilityUpdateRequestItems0ProgramsItems0) map[string]interface{} {
-		newP := map[string]interface{} {
+	mkProgram := func(p *models.FacilityUpdateRequestItems0ProgramsItems0) map[string]interface{} {
+		newP := map[string]interface{}{
 			"programId":       p.ID,
 			"status":          p.Status,
 			"rate":            p.Rate,
@@ -596,12 +604,12 @@ func updateFacilityProgramsData(facility map[string]interface{}, updateRequest *
 				if updateProgram.Status != "" && updateProgram.Status != facilityProgram["status"].(string) {
 					facilityProgram["status"] = updateProgram.Status
 					facilityProgram["statusUpdatedAt"] = time.Now().Format(time.RFC3339)
-					services.NotifyFacilityUpdate("status", updateProgram.Status,facilityContact, facilityEmail)
+					services.NotifyFacilityUpdate("status", updateProgram.Status, facilityContact, facilityEmail)
 				}
 				if updateProgram.Rate != 0 && updateProgram.Rate != facilityProgram["rate"].(float64) {
 					facilityProgram["rate"] = updateProgram.Rate
 					facilityProgram["rateUpdatedAt"] = time.Now().Format(time.RFC3339)
-					services.NotifyFacilityUpdate("rate", utils.ToString(updateProgram.Rate),facilityContact, facilityEmail)
+					services.NotifyFacilityUpdate("rate", utils.ToString(updateProgram.Rate), facilityContact, facilityEmail)
 				}
 				if updateProgram.Schedule != nil {
 					facilityProgram["schedule"] = mkSchedule(*updateProgram.Schedule)
@@ -745,7 +753,7 @@ func createVaccinatorHandler(params operations.CreateVaccinatorParams, principal
 	facilityCode := principal.FacilityCode
 	vaccinator := params.Body
 	vaccinator.FacilityIds = []string{facilityCode}
-	err := kernelService.CreateNewRegistry(vaccinator, "Vaccinator")
+	_, err := kernelService.CreateNewRegistry(vaccinator, "Vaccinator")
 	if err != nil {
 		log.Error(err)
 		return operations.NewCreateVaccinatorBadRequest()
@@ -873,7 +881,7 @@ func getUserFacilityDetails(params operations.GetUserFacilityParams, claimBody *
 	}
 }
 
-func enrichResponseWithProgramDetails(response interface{}) []interface{}{
+func enrichResponseWithProgramDetails(response interface{}) []interface{} {
 	responseArr := response.([]interface{})
 	if responseArr == nil || len(responseArr) == 0 {
 		return []interface{}{}
@@ -881,7 +889,7 @@ func enrichResponseWithProgramDetails(response interface{}) []interface{}{
 	limit, offset := getLimitAndOffset(nil, nil)
 	var results []interface{}
 
-	for _,objects := range responseArr {
+	for _, objects := range responseArr {
 		obj := objects.(map[string]interface{})
 		if programs, ok := obj["programs"].([]interface{}); ok {
 			updatedPrograms := []interface{}{}
@@ -918,7 +926,11 @@ func getProgramById(osid string, limit int, offset int) (map[string]interface{},
 }
 
 func createSlotForProgramFacilityHandler(params operations.ConfigureSlotFacilityParams, principal *models.JWTClaimBody) middleware.Responder {
-	// TODO: check if user and updated facility belongs to same facilityCode
+	responder, e := validateIfUserHasPermissionsForFacilityProgram(params.FacilityID, params.ProgramID, principal)
+	if e {
+		return responder
+	}
+
 	var appointmentSchedule []*models.FacilityAppointmentSchedule
 	var walkInSchedule []*models.FacilityWalkInSchedule
 
@@ -940,7 +952,7 @@ func createSlotForProgramFacilityHandler(params operations.ConfigureSlotFacility
 		AppointmentSchedule: appointmentSchedule,
 		WalkInSchedule:      walkInSchedule,
 	}
-	err := kernelService.CreateNewRegistry(facilityProgramSlot, "FacilityProgramSlot")
+	_, err := kernelService.CreateNewRegistry(facilityProgramSlot, "FacilityProgramSlot")
 	if err != nil {
 		log.Error(err)
 		return operations.NewConfigureSlotFacilityBadRequest()
@@ -948,9 +960,50 @@ func createSlotForProgramFacilityHandler(params operations.ConfigureSlotFacility
 	return operations.NewConfigureSlotFacilityOK()
 }
 
-func getFacilityProgramScheduleHandler(params operations.GetFacilityProgramScheduleParams, principal *models.JWTClaimBody) middleware.Responder {
-	// TODO: check if user and updated facility belongs to same facilityCode
+func validateIfUserHasPermissionsForFacilityProgram(facilityId string, programId string, principal *models.JWTClaimBody) (middleware.Responder, bool) {
+	resp, e := kernelService.ReadRegistry("Facility", facilityId)
+	if e != nil {
+		log.Infof("Facility for given osid doesn't exist %d", facilityId)
+		return operations.NewConfigureSlotFacilityBadRequest(), true
+	}
+	facility, ok := resp["Facility"].(map[string]interface{})
+	if !ok {
+		log.Errorf("Error reading registry response", e)
+		return model.NewGenericServerError(), true
+	}
+	if facility["facilityCode"] != principal.FacilityCode {
+		log.Infof("User doesnt belong to the facility which is being updated")
+		return operations.NewConfigureSlotFacilityUnauthorized(), true
+	}
 
+	currentPrograms, ok := facility["programs"].([]interface{})
+	if !ok {
+		log.Infof("No programs exist for given facility %s", principal.FacilityCode)
+		return operations.NewConfigureSlotFacilityBadRequest(), true
+	}
+	hasGivenProgram := false
+	for _, p := range currentPrograms {
+		prg, ok := p.(map[string]interface{})
+		if !ok {
+			log.Errorf("Error converting program to interface", e)
+			return model.NewGenericServerError(), true
+		}
+		if prg["programId"] == programId {
+			hasGivenProgram = true
+		}
+	}
+	if !hasGivenProgram {
+		log.Infof("Given program %s doesn't exist for facility %s", programId, principal.FacilityCode)
+		return operations.NewConfigureSlotFacilityBadRequest(), true
+	}
+	return nil, false
+}
+
+func getFacilityProgramScheduleHandler(params operations.GetFacilityProgramScheduleParams, principal *models.JWTClaimBody) middleware.Responder {
+	responder, e := validateIfUserHasPermissionsForFacilityProgram(params.FacilityID, params.ProgramID, principal)
+	if e {
+		return responder
+	}
 	response, err := getFacilityProgramSchedule(params.FacilityID, params.ProgramID)
 	if err != nil {
 		return operations.NewGetFacilityProgramScheduleNotFound()
@@ -959,10 +1012,13 @@ func getFacilityProgramScheduleHandler(params operations.GetFacilityProgramSched
 }
 
 func updateFacilityProgramScheduleHandler(params operations.UpdateFacilityProgramScheduleParams, principal *models.JWTClaimBody) middleware.Responder {
-	// TODO: check if user and updated facility belongs to same facilityCode
+
+	responder, e := validateIfUserHasPermissionsForFacilityProgram(params.FacilityID, params.ProgramID, principal)
+	if e {
+		return responder
+	}
 
 	objectId := "FacilityProgramSlot"
-
 	response, err := getFacilityProgramSchedule(params.FacilityID, params.ProgramID)
 	if err != nil {
 		operations.NewUpdateFacilityProgramScheduleBadRequest()

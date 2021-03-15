@@ -21,9 +21,6 @@
         "phone" : {
           "type": "string"
         },
-        "enrollmentScopeId": {
-          "type": "string"
-        },
         "nationalId": {
           "type": "string"
         },
@@ -47,24 +44,44 @@
         "code": {
           "type": "string"
         },
-        "certified": {
-          "type": "boolean",
-          "default": false
-        },
-        "programId": {
-          "type": "string"
-        },
-        "appointmentSlot": {
-          "type": "string"
-        },
-        "appointmentDate": {
-          "type": "string",
-          "format": "date"
+        "appointments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "programId": {
+                "type": "string"
+              },
+              "appointmentSlot": {
+                "type": "string"
+              },
+              "appointmentDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "certified": {
+                "type": "boolean",
+                "default": false
+              },
+              "enrollmentScopeId": {
+                "type": "string"
+              },
+              "dose": {
+                "type": "string"
+              }
+            }
+          }
         },
         "address": {
           "$id": "#/properties/address",
           "$ref": "Common.json#/definitions/Address",
           "title": "Address"
+        },
+        "comorbidities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

@@ -34,7 +34,7 @@ type Address struct {
 
 	// The pincode schema
 	// Required: true
-	Pincode *int64 `json:"pincode"`
+	Pincode *string `json:"pincode"`
 
 	// The state schema
 	//

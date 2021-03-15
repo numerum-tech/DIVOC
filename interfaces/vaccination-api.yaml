@@ -109,6 +109,10 @@ paths:
         - in: query
           name: offset
           type: number
+        - in: query
+          name: date
+          type: string
+          format: date
       responses:
         '200':
           description: OK
@@ -367,6 +371,10 @@ definitions:
         type: string
       email:
         type: string
+      appointmentDate:
+        type: string
+      certified:
+        type: boolean
       meta:
         type: object
       certified:
@@ -385,7 +393,7 @@ definitions:
           state:
             type: string
           pincode:
-            type: integer
+            type: string
   CertificationRequest:
     type: object
     properties:
@@ -424,7 +432,7 @@ definitions:
               state:
                 type: string
               pincode:
-                type: integer
+                type: string
             required:
               - addressLine1
               - district
@@ -497,7 +505,7 @@ definitions:
               state:
                 type: string
               pincode:
-                type: integer
+                type: string
             required:
               - addressLine1
               - district

@@ -60,7 +60,8 @@ func MakeRegistryCreateRequest(requestMap interface{}, objectId string) middlewa
 	url := registryUrl(config.Config.Registry.AddOperationId)
 	log.Info("Using registry url ", url)
 	log.Infof("Request >> %+v", requestJson)
-	resp, err := req.Post(url, req.BodyJSON(requestJson))
+	r := req.New()
+	resp, err := r.Post(url, req.BodyJSON(requestJson))
 
 	if resp == nil || err != nil {
 		log.Error("Failed to request registry ", url, " ", err)
@@ -72,7 +73,7 @@ func MakeRegistryCreateRequest(requestMap interface{}, objectId string) middlewa
 		return model.NewGenericServerError()
 	}
 	respStr, _ := resp.ToString()
-	log.Infof("Response from registry %+v", respStr)
+	log.Debugf("Response from registry %+v", respStr)
 	var registryResponse = RegistryResponse{}
 	err = json.Unmarshal(resp.Bytes(), &registryResponse)
 	if err != nil {
@@ -85,7 +86,7 @@ func MakeRegistryCreateRequest(requestMap interface{}, objectId string) middlewa
 	return model.NewGenericStatusOk()
 }
 
-func CreateNewRegistry(requestMap interface{}, objectId string) error {
+func CreateNewRegistry(requestMap interface{}, objectId string) (RegistryResponse, error) {
 	requestJson := CreateEntityRegistryRequest{
 		ID:  "open-saber.registry.create",
 		Ver: config.Config.Registry.ApiVersion,
@@ -100,27 +101,28 @@ func CreateNewRegistry(requestMap interface{}, objectId string) error {
 	url := registryUrl(config.Config.Registry.AddOperationId)
 	log.Info("Using registry url ", url)
 	log.Infof("Request >> %+v", requestJson)
-	resp, err := req.Post(url, req.BodyJSON(requestJson))
+	r := req.New()
+	resp, err := r.Post(url, req.BodyJSON(requestJson))
 
 	if resp == nil || err != nil {
 		log.Error("Failed to request registry ", url, " ", err)
-		return err
+		return RegistryResponse{}, err
 	}
 	if resp.Response().StatusCode != 200 {
 		log.Error("Registry response is ", resp.Response().StatusCode, url)
 		println(resp.Response().Status)
 		log.Error("Next R Error" + string(resp.Response().Status))
-		return errors.New("Registry response is " + string(resp.Response().StatusCode))
+		return RegistryResponse{}, errors.New("Registry response is " + string(resp.Response().StatusCode))
 	}
 	respStr, _ := resp.ToString()
-	log.Infof("Response from registry %+v", respStr)
+	log.Debugf("Response from registry %+v", respStr)
 	var registryResponse = RegistryResponse{}
 	err = json.Unmarshal(resp.Bytes(), &registryResponse)
 	log.Info("Got response from registry ", registryResponse.Params.Status)
 	if registryResponse.Params.Status != "SUCCESSFUL" {
-		return errors.New(registryResponse.Params.Errmsg)
+		return registryResponse, errors.New(registryResponse.Params.Errmsg)
 	}
-	return nil
+	return registryResponse, nil
 }
 
 func registryUrl(operationId string) string {
@@ -156,7 +158,7 @@ func analyseResponse(response *req.Resp, err error) (map[string]interface{}, err
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to parse response from registry.")
 	}
-	log.Infof("Response %+v", responseObject)
+	log.Debugf("Response %+v", responseObject)
 	if responseObject.Params.Status != "SUCCESSFUL" {
 		log.Infof("Response from registry %+v", responseObject)
 		return nil, errors.New("Failed while querying from registry")
@@ -201,7 +203,8 @@ func UpdateRegistry(typeId string, update map[string]interface{}) (map[string]in
 		},
 	}
 	log.Info("Registry query ", queryRequest)
-	response, err := req.Post(config.Config.Registry.Url+"/"+config.Config.Registry.UpdateOperationId, req.BodyJSON(queryRequest))
+	r := req.New()
+	response, err := r.Post(config.Config.Registry.Url+"/"+config.Config.Registry.UpdateOperationId, req.BodyJSON(queryRequest))
 	if err != nil {
 		return nil, errors.Errorf("Error while updating registry", err)
 	}
@@ -213,7 +216,7 @@ func UpdateRegistry(typeId string, update map[string]interface{}) (map[string]in
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to parse response from registry.")
 	}
-	log.Infof("Response %+v", responseObject)
+	log.Debugf("Response %+v", responseObject)
 	if responseObject.Params.Status != "SUCCESSFUL" {
 		log.Infof("Response from registry %+v", responseObject)
 		return nil, errors.New("Failed while querying from registry")
