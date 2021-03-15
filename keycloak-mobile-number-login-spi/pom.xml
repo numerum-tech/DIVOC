@@ -45,6 +45,11 @@
       <artifactId>jboss-logging</artifactId>
       <version>3.4.1.Final</version>
     </dependency>
+    <dependency>
+      <groupId>tangrammer</groupId>
+      <artifactId>java-net-http-client</artifactId>
+      <version>0.1.2</version>
+    </dependency>
 
   </dependencies>
 
