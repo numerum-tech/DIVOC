@@ -69,6 +69,7 @@ services:
       - KEYCLOAK_FRONTEND_URL=https://divoc.togosafe.gouv.tg/auth
       - PROXY_ADDRESS_FORWARDING=true
       - ./keycloak-mobile-number-login-spi/themes:/opt/jboss/keycloak/themes/
+      - ./keycloak-mobile-number-login-spi/providers:/opt/jboss/keycloak/providers/
     healthcheck:
       test:
         ["CMD", "curl", "-f", "http://localhost:9990"]
