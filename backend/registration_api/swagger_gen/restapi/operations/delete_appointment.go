@@ -6,7 +6,10 @@ package operations
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+<<<<<<< HEAD
 	"context"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -36,7 +39,11 @@ func NewDeleteAppointment(ctx *middleware.Context, handler DeleteAppointmentHand
 	return &DeleteAppointment{Context: ctx, Handler: handler}
 }
 
+<<<<<<< HEAD
 /* DeleteAppointment swagger:route DELETE /appointment deleteAppointment
+=======
+/*DeleteAppointment swagger:route DELETE /appointment deleteAppointment
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 Delete the appointment
 
@@ -52,6 +59,10 @@ func (o *DeleteAppointment) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewDeleteAppointmentParams()
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,6 +82,10 @@ func (o *DeleteAppointment) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -89,11 +104,14 @@ func (o *DeleteAppointmentBadRequestBody) Validate(formats strfmt.Registry) erro
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this delete appointment bad request body based on context it is used
 func (o *DeleteAppointmentBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (o *DeleteAppointmentBadRequestBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -179,11 +197,14 @@ func (o *DeleteAppointmentBody) validateProgramID(formats strfmt.Registry) error
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this delete appointment body based on context it is used
 func (o *DeleteAppointmentBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (o *DeleteAppointmentBody) MarshalBinary() ([]byte, error) {
 	if o == nil {

@@ -56,13 +56,17 @@
           "items": {
             "type": "object",
             "properties": {
+<<<<<<< HEAD
               "osid": {
                 "type": "string"
               },
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
               "programId": {
                 "type": "string"
               },
               "appointmentSlot": {
+<<<<<<< HEAD
                 "type": "string",
                 "x-omitempty": false
               },
@@ -78,6 +82,20 @@
               "enrollmentScopeId": {
                 "type": "string",
                 "x-omitempty": false
+=======
+                "type": "string"
+              },
+              "appointmentDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "certified": {
+                "type": "boolean",
+                "default": false
+              },
+              "enrollmentScopeId": {
+                "type": "string"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
               },
               "dose": {
                 "type": "string"
@@ -89,6 +107,12 @@
           "$id": "#/properties/address",
           "$ref": "Common.json#/definitions/Address",
           "title": "Address"
+        },
+        "comorbidities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

@@ -8,6 +8,7 @@
   "app.profile": "प्रोफाइल",
   "app.actionTitle": "क्रिया",
   "app.recipientDetailsTitle": "लाभार्थी संख्या",
+<<<<<<< HEAD
   "app.enrollmentToday": "आज ({date})",
   "app.appointmentToday": "आज के नामांकन",
   "app.morningSchedule": "सुबह",
@@ -16,6 +17,9 @@
   "app.statusBooked":  "निर्धारित",
   "app.statusOpen": "खाली",
   "app.statusOngoing": "Ongoing",
+=======
+  "app.enrollmentToday": "आज के नामांकन",
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
   "app.selectLanguage": "भाषा चुनें",
   "app.selectProgram": "टीका कार्यक्रम चुनें",
   "app.verifyRecipient": "लाभार्थी सत्यापन",

@@ -89,7 +89,10 @@ export function SelectProgram({onDone}) {
                 setPrograms(result);
                 if (result?.length === 1) {
                     saveSelectedProgram(result[0].name);
+<<<<<<< HEAD
                     saveSelectedProgramId(result[0].id);
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                     onDone(result[0].name);
                 }
             })

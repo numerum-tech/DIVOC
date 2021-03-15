@@ -21,7 +21,11 @@ export const CustomDropdown = ({items}) => {
                 <span style={{fontSize: "20px", fontWeight: "bolder"}}>&#8942;</span>
             </Dropdown.Toggle>
 
+<<<<<<< HEAD
             <Dropdown.Menu className="d-flex flex-column pr-3">
+=======
+            <Dropdown.Menu>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                 {
                     items.map(item => (
                         <div className="d-inline-flex align-items-center">

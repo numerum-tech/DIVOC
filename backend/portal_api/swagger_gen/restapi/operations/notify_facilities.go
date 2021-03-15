@@ -79,6 +79,7 @@ func (o *NotifyFacilities) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 //
 // swagger:model NotifyFacilitiesBody
 type NotifyFacilitiesBody struct {
+<<<<<<< HEAD
 
 	// facilities
 	// Required: true
@@ -94,6 +95,23 @@ type NotifyFacilitiesBody struct {
 	Subject string `json:"subject,omitempty"`
 }
 
+=======
+
+	// facilities
+	// Required: true
+	// Min Items: 1
+	Facilities []string `json:"facilities"`
+
+	// message
+	// Required: true
+	// Min Length: 5
+	Message *string `json:"message"`
+
+	// subject
+	Subject string `json:"subject,omitempty"`
+}
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // Validate validates this notify facilities body
 func (o *NotifyFacilitiesBody) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -125,6 +143,7 @@ func (o *NotifyFacilitiesBody) validateFacilities(formats strfmt.Registry) error
 	}
 
 	return nil
+<<<<<<< HEAD
 }
 
 func (o *NotifyFacilitiesBody) validateMessage(formats strfmt.Registry) error {
@@ -142,6 +161,20 @@ func (o *NotifyFacilitiesBody) validateMessage(formats strfmt.Registry) error {
 
 // ContextValidate validates this notify facilities body based on context it is used
 func (o *NotifyFacilitiesBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+=======
+}
+
+func (o *NotifyFacilitiesBody) validateMessage(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"message", "body", o.Message); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("body"+"."+"message", "body", string(*o.Message), 5); err != nil {
+		return err
+	}
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	return nil
 }
 

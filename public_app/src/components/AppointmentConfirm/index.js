@@ -13,7 +13,11 @@ export const AppointmentConfirm = (props) => {
             <h2 className="">Successfully booked appointment for {state.program.name || "Covid 19 program"}</h2>
             <h2 className="mt-5 mb-5">Enrolment number: {enrollment_code}</h2>
             <span style={{fontSize: "18px", marginBottom: "1rem"}}>Appointment details will be sent to the registered mobile number and/or email.</span>
+<<<<<<< HEAD
             <span style={{fontSize: "18px", marginBottom: "1rem"}}>On the day of vaccination, please carry your original {getNameOfTheId(getNationalIdType(state.nationalId))} for verification</span>
+=======
+            <span style={{fontSize: "18px", marginBottom: "1rem"}}>On the day of vaccination, please carry your original {getNameOfTheId(getNationalIdType(state.nationalId))} for manual verification</span>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
         </CustomConfirmPage>
     )
 };

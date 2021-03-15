@@ -3,9 +3,12 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+<<<<<<< HEAD
 	"strconv"
 	"time"
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	"github.com/divoc/kernel_library/model"
 	kernelService "github.com/divoc/kernel_library/services"
 	"github.com/divoc/registration-api/config"
@@ -16,9 +19,16 @@ import (
 	models3 "github.com/divoc/registration-api/swagger_gen/models"
 	"github.com/divoc/registration-api/swagger_gen/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
+<<<<<<< HEAD
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+=======
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"strconv"
+	"time"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 )
 
 const FacilityEntity = "Facility"
@@ -83,7 +93,10 @@ func getRecipients(params operations.GetRecipientsParams, principal *models3.JWT
 
 func enrollRecipient(params operations.EnrollRecipientParams, principal *models3.JWTClaimBody) middleware.Responder {
 	params.Body.Phone = principal.Phone
+<<<<<<< HEAD
 	params.Body.EnrollmentType = "SELF_ENRL"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if recipientData, err := json.Marshal(params.Body); err == nil {
 		log.Info("Received Recipient data to enroll", string(recipientData), params.Body)
 		services.PublishEnrollmentMessage(recipientData)
@@ -178,10 +191,13 @@ func canInitializeSlots() bool {
 
 func initializeFacilitySlots(params operations.InitializeFacilitySlotsParams) middleware.Responder {
 	currentDate := time.Now()
+<<<<<<< HEAD
 	programDates, err := services.GetActiveProgramDates()
 	if err != nil {
 		return model.NewGenericServerError()
 	}
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if canInitializeSlots() {
 		log.Infof("Initializing facility slots")
 		filters := map[string]interface{}{}
@@ -262,8 +278,13 @@ func getFacilitySlots(params operations.GetSlotsForFacilitiesParams, principal *
 		return operations.NewGenerateOTPBadRequest()
 	}
 	offset := (*params.PageNumber) * (*params.PageSize)
+<<<<<<< HEAD
 	tomorrowStart := fmt.Sprintf("%d", utils.GetTomorrowStart().Unix())
 	slotKeys, err := services.GetValuesByScoreFromSet(*params.FacilityID, tomorrowStart, "inf", *params.PageSize, offset)
+=======
+	now := fmt.Sprintf("%d", time.Now().Unix())
+	slotKeys, err := services.GetValuesByScoreFromSet(*params.FacilityID, now, "inf", *params.PageSize, offset)
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if err == nil && len(slotKeys) > 0 {
 		slotsAvailable, err := services.GetValues(slotKeys...)
 		if err == nil {
@@ -299,7 +320,11 @@ func bookSlot(params operations.BookSlotOfFacilityParams, principal *models3.JWT
 						EnrollmentCode:  *params.Body.EnrollmentCode,
 						SlotID:          *params.Body.FacilitySlotID,
 						FacilityCode:    facilitySchedule.FacilityCode,
+<<<<<<< HEAD
 						AppointmentDate: strfmt.Date(facilitySchedule.Date),
+=======
+						AppointmentDate: facilitySchedule.DateString(),
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 						AppointmentTime: facilitySchedule.StartTime + "-" + facilitySchedule.EndTime,
 						CreatedAt:       time.Now(),
 						Status:          models2.AllottedStatus,
@@ -371,7 +396,11 @@ func deleteAppointmentInEnrollment(enrollmentCode string, phone string, dose str
 							ProgramId:       programId,
 							SlotID:          "",
 							FacilityCode:    "",
+<<<<<<< HEAD
 							AppointmentDate: strfmt.Date{},
+=======
+							AppointmentDate: "0001-01-01",
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 							AppointmentTime: "",
 							CreatedAt:       time.Now(),
 							Status:          models2.CancelledStatus,
@@ -402,6 +431,7 @@ func deleteRecipient(params operations.DeleteRecipientParams, principal *models3
 				log.Error(err)
 				return operations.NewDeleteRecipientBadRequest()
 			} else {
+<<<<<<< HEAD
 				if err := services.DeleteValue(enrollmentCode); err == nil {
 					services.NotifyDeletedRecipient(enrollmentCode, enrollmentInfo)	
 				} else {
@@ -416,6 +446,19 @@ func deleteRecipient(params operations.DeleteRecipientParams, principal *models3
 		response.Payload = &operations.DeleteAppointmentBadRequestBody{
 			Message: errorMessage,
 		}
+=======
+				err := services.DeleteValue(enrollmentCode)
+				log.Error(err)
+			}
+			return operations.NewDeleteRecipientOK()
+		}
+	} else {
+		errorMessage := "Deleting a recipient is not allowed if appointment is scheduled."
+		response := operations.NewDeleteAppointmentBadRequest()
+		response.Payload = &operations.DeleteAppointmentBadRequestBody{
+			Message: errorMessage,
+		}
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 		log.Info(errorMessage)
 		return response
 	}
@@ -430,7 +473,11 @@ func checkIfCancellationAllowed(enrollmentInfo map[string]string) string {
 		return fmt.Sprintf("Cancellation is not allowed")
 	}
 	if remainingHoursForSchedule <= float64(config.Config.MinCancellationHours) {
+<<<<<<< HEAD
 		return fmt.Sprintf("Cancellation within %d hours of appointment is not allowed", config.Config.MinCancellationHours)
+=======
+		return fmt.Sprintf("Cancellation before %d hours is not allowed", config.Config.MinCancellationHours)
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	}
 	updatedCount, _ := strconv.Atoi(enrollmentInfo["updatedCount"])
 	if updatedCount >= config.Config.MaxAppointmentUpdatesAllowed {

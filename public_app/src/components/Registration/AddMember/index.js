@@ -144,7 +144,11 @@ const SelectComorbidity = ({setValue, formData, navigation, programs}) => {
   const curYear = new Date().getFullYear();
   const [showCommorbidity, setShowCommorbidity] = useState("yes");
 
+<<<<<<< HEAD
   const [minAge, setMinAge] = useState(0);
+=======
+  const [minAge, setMinAge] = useState(50);
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
   const [maxAge, setMaxAge] = useState(curYear - MINIMUM_SUPPORT_YEAR);
 
   useEffect(() => {
@@ -165,8 +169,13 @@ const SelectComorbidity = ({setValue, formData, navigation, programs}) => {
       .then((result) => {
         if(result["variantAttachment"]) {
           setConditions(result["variantAttachment"].commorbidities || [])
+<<<<<<< HEAD
           setMinAge(result["variantAttachment"].minAge || 0)
           setMaxAge(result["variantAttachment"].maxAge || curYear - MINIMUM_SUPPORT_YEAR)
+=======
+          setMinAge(result["variantAttachment"].minAge)
+          setMaxAge(result["variantAttachment"].maxAge)
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
         } else {
           console.error("program eligibility criteria is not configure");
         }
@@ -183,11 +192,15 @@ const SelectComorbidity = ({setValue, formData, navigation, programs}) => {
       return (curYear - formData.yob) >= minAge && (curYear - formData.yob) <= maxAge;
     }
 
+<<<<<<< HEAD
     function hasConditions() {
       return conditions && conditions.length> 0
     }
 
     if(hasConditions() && formData.choice === "yes" && formData.comorbidities.length === 0) {
+=======
+    if(formData.choice === "yes" && formData.comorbidities.length === 0) {
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
       setErrors({...errors, "choice":"* Please select at least one comorbidity"});
     }
     else if (formData.yob && formData.yob > 1900 && formData.choice === "yes" &&
@@ -256,11 +269,19 @@ const SelectComorbidity = ({setValue, formData, navigation, programs}) => {
               {errors.yob}
             </div>
           </div>
+<<<<<<< HEAD
           <div className="pt-5" hidden={!conditions || conditions.length === 0}>
               <p style={{fontSize:"1.1rem"}}>Does the beneficiary have any of the following comorbidities?</p>
               <div className="pl-2 form-check form-check-inline">
                 <input className="form-check-input" type="radio" onChange={showComorbiditiesHandler}
                        id="yes" name="choice" value="yes" checked={formData.choice === "yes"}/>
+=======
+          <div className="pt-5">
+              <p style={{fontSize:"1.1rem"}}>Does the beneficiary have any of the following comorbidities?</p>
+              <div className="pl-2 form-check form-check-inline">
+                <input className="form-check-input" type="radio" onChange={showComorbiditiesHandler}
+                       id="yes" name="choice" value="yes" defaultChecked checked={formData.choice === "yes"}/>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                 <label className="form-check-label" htmlFor="yes">Yes</label>
               </div>
               <div className="pl-2 form-check form-check-inline">
@@ -269,7 +290,11 @@ const SelectComorbidity = ({setValue, formData, navigation, programs}) => {
                 <label className="form-check-label" htmlFor="no">No</label>
               </div>
             <div hidden={formData.choice === "no"} className="pt-3">
+<<<<<<< HEAD
               <p>If yes, please select (all) applicable comorbidities</p>
+=======
+              <p>If Yes, Please select comorbidity</p>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
               <Row className={"col-6 ml-0"}>
                 {
                   conditions.map(x =>

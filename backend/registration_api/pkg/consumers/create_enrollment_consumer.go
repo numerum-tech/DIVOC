@@ -38,12 +38,20 @@ func StartEnrollmentConsumer() {
 
 				if err == nil {
 					log.Infof("Message on %s: %v \n", msg.TopicPartition, string(msg.Value))
+<<<<<<< HEAD
 					osid, err := services.CreateEnrollment(&enrollment.Enrollment, 1)
 					services.PublishEnrollmentACK(enrollment.RowID, err)
 					// Below condition flow will be used by WALK_IN component.
 					if err == nil {
 						cacheEnrollmentInfo(enrollment.Enrollment, osid)
 						err := services.NotifyRecipient(enrollment.Enrollment)
+=======
+					osid, err := services.CreateEnrollment(&enrollment, 1)
+					// Below condition flow will be used by WALK_IN component.
+					if err == nil {
+						cacheEnrollmentInfo(enrollment, osid)
+						err := services.NotifyRecipient(enrollment)
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 						if err != nil {
 							log.Error("Unable to send notification to the enrolled user", err)
 						}

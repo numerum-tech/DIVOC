@@ -960,6 +960,7 @@ func validateIfUserHasPermissionsForFacilityProgram(facilityId string, programId
 		log.Infof("User doesnt belong to the facility which is being updated")
 		return operations.NewConfigureSlotFacilityUnauthorized(), true
 	}
+<<<<<<< HEAD
 
 	currentPrograms, ok := facility["programs"].([]interface{})
 	if !ok {
@@ -984,6 +985,32 @@ func validateIfUserHasPermissionsForFacilityProgram(facilityId string, programId
 	return nil, false
 }
 
+=======
+
+	currentPrograms, ok := facility["programs"].([]interface{})
+	if !ok {
+		log.Infof("No programs exist for given facility %s", principal.FacilityCode)
+		return operations.NewConfigureSlotFacilityBadRequest(), true
+	}
+	hasGivenProgram := false
+	for _, p := range currentPrograms {
+		prg, ok := p.(map[string]interface{})
+		if !ok {
+			log.Errorf("Error converting program to interface", e)
+			return model.NewGenericServerError(), true
+		}
+		if prg["programId"] == programId {
+			hasGivenProgram = true
+		}
+	}
+	if !hasGivenProgram {
+		log.Infof("Given program %s doesn't exist for facility %s", programId, principal.FacilityCode)
+		return operations.NewConfigureSlotFacilityBadRequest(), true
+	}
+	return nil, false
+}
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 func getFacilityProgramScheduleHandler(params operations.GetFacilityProgramScheduleParams, principal *models.JWTClaimBody) middleware.Responder {
 	responder, e := validateIfUserHasPermissionsForFacilityProgram(params.FacilityID, params.ProgramID, principal)
 	if e {

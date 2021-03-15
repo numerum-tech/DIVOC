@@ -98,7 +98,7 @@ export const Appointment = (props) => {
     function getFacilityDetails() {
         if (showModal && "facilityId" in selectedAllotment) {
             const facility = facilities.find(facility => facility.osid === selectedAllotment.facilityId);
-            return <>{`At ${facility.facilityName},`}<br/> {`${formatAddress(facility.address)}`}</>;
+            return <>{`at ${facility.facilityName},`}<br/> {`${formatAddress(facility.address)}`}</>;
         } else {
             return "";
         }
@@ -240,6 +240,7 @@ export const Appointment = (props) => {
                         <div/>
                         <h5>Confirm Appointment Details </h5>
                     </div>
+<<<<<<< HEAD
                     <div className="d-flex flex-column">
                         <span>For {state && state.name}</span>
                         <span className="mt-2">{getFacilityDetails()}</span>
@@ -258,6 +259,14 @@ export const Appointment = (props) => {
                        </Col> 
                        <Col>
                        <CustomButton className="blue-btn" onClick={() => {
+=======
+                    <div className="d-flex flex-column justify-content-center align-items-center">
+                        <span>For {state && state.name}</span>
+                        <span className="text-center mt-1">{getFacilityDetails()}</span>
+                        <span className="mt-1">on {formatDate(selectedAllotment.allotmentDate)}</span>
+                        <span className="mt-1">at {selectedAllotment.allotmentTime}</span>
+                        <CustomButton className="blue-btn" onClick={() => {
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                             bookSlot()
                         }}>CONFIRM</CustomButton>
                        </Col>

@@ -210,7 +210,11 @@ func UpdateRegistry(typeId string, update map[string]interface{}) (map[string]in
 	}
 	log.Info("Registry query ", queryRequest)
 	r := req.New()
+<<<<<<< HEAD
 	response, err := r.Post(registryUrl(config.Config.Registry.UpdateOperationId, typeId), req.BodyJSON(queryRequest))
+=======
+	response, err := r.Post(config.Config.Registry.Url+"/"+config.Config.Registry.UpdateOperationId, req.BodyJSON(queryRequest))
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if err != nil {
 		return nil, errors.Errorf("Error while updating registry", err)
 	}

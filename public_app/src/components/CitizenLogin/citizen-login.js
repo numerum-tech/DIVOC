@@ -4,9 +4,15 @@ import axios from "axios";
 import {setCookie} from "../../utils/cookies";
 import {CITIZEN_TOKEN_COOKIE_NAME} from "../../constants";
 
+<<<<<<< HEAD
 export function CitizenLoginComponent(props) {
     const [state, setState] = useState({
         phoneNumber: (props.location.state && props.location.state.mobileNumber) ? props.location.state.mobileNumber : "",
+=======
+export function CitizenLoginComponent() {
+    const [state, setState] = useState({
+        phoneNumber: "",
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
         otp: "",
         showOnlyOTP: true,
         invalidOTP: "",

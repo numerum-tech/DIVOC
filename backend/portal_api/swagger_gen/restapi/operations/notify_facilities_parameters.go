@@ -56,11 +56,14 @@ func (o *NotifyFacilitiesParams) BindRequest(r *http.Request, route *middleware.
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
+<<<<<<< HEAD
 			}
 
 			ctx := validate.WithOperationRequest(context.Background())
 			if err := body.ContextValidate(ctx, route.Formats); err != nil {
 				res = append(res, err)
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 			}
 
 			if len(res) == 0 {

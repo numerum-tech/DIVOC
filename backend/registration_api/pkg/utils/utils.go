@@ -56,6 +56,7 @@ func SendOTP(prefix string, phone string, otp string) (*sns.PublishOutput, error
 	log.Infof("Message sent %s %+v", phone, resp)
 	return resp, err
 }
+<<<<<<< HEAD
 
 func ToMap(obj interface{}) map[string]interface{}{
 	if bytes, err := json.Marshal(obj); err == nil {
@@ -70,3 +71,5 @@ func ToMap(obj interface{}) map[string]interface{}{
 func GetTomorrowStart() time.Time {
 	return time.Now().Truncate(24 * time.Hour).AddDate(0, 0, 1)
 }
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe

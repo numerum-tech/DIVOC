@@ -3499,6 +3499,7 @@ func init() {
       "properties": {
         "appointmentDate": {
           "type": "string",
+<<<<<<< HEAD
           "format": "date",
           "x-omitempty": false
         },
@@ -3509,15 +3510,28 @@ func init() {
         "certified": {
           "type": "boolean",
           "x-omitempty": false
+=======
+          "format": "date"
+        },
+        "appointmentSlot": {
+          "type": "string"
+        },
+        "certified": {
+          "type": "boolean",
+          "default": false
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
         },
         "dose": {
           "type": "string"
         },
         "enrollmentScopeId": {
+<<<<<<< HEAD
           "type": "string",
           "x-omitempty": false
         },
         "osid": {
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
           "type": "string"
         },
         "programId": {
@@ -4407,6 +4421,7 @@ func init() {
         "email": {
           "type": "string"
         },
+<<<<<<< HEAD
         "enrollmentType": {
           "type": "string",
           "enum": [
@@ -4415,6 +4430,8 @@ func init() {
             "WALK_IN"
           ]
         },
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
         "gender": {
           "type": "string",
           "enum": [

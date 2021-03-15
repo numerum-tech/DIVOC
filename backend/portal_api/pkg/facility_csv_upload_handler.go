@@ -49,7 +49,11 @@ func (facilityCsv FacilityCSV) ProcessRow(uploadID uint) error {
 		WebsiteURL:         data.Text("websiteURL"),
 		Programs:           []*models.FacilityProgramsItems0{},
 	}
+<<<<<<< HEAD
 	_, err := services.CreateNewRegistry(facility, "Facility")
+=======
+	_, err = services.CreateNewRegistry(facility, "Facility")
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if err != nil {
 		errmsg := err.Error()
 		if strings.Contains(errmsg, "Detail:") {

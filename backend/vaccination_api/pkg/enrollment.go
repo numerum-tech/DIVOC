@@ -61,9 +61,15 @@ func findEnrollmentScopeAndCode(scopeID string, code string, limit int, offset i
 	return nil, errors.New("unable to get the enrollment " + code)
 }
 
+<<<<<<< HEAD
 func findEnrollmentsForScope(facilityCode string, params vaccination.GetPreEnrollmentsForFacilityParams) ([]*models.Enrollment, error) {
 	limit, offset := getLimitAndOffset(params.Limit, params.Offset)
 	typeID := "Enrollment"
+=======
+func findEnrollmentsForScope(facilityCode string, params vaccination.GetPreEnrollmentsForFacilityParams) ([]*models.PreEnrollment, error) {
+	limit, offset := getLimitAndOffset(params.Limit, params.Offset)
+	typeId := "Enrollment"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	filter := map[string]interface{}{
 		"appointments.enrollmentScopeId": map[string]interface{}{
 			"eq": facilityCode,
@@ -73,15 +79,27 @@ func findEnrollmentsForScope(facilityCode string, params vaccination.GetPreEnrol
 		},
 	}
 	if params.Date != nil {
+<<<<<<< HEAD
 		filter["appointments.appointmentDate"] = map[string]interface{}{
+=======
+		filter["appointmentDate"] = map[string]interface{}{
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 			"eq": params.Date.String(),
 		}
 	}
 
+<<<<<<< HEAD
 	if enrollmentsJSON, err := services.QueryRegistry(typeID, filter, limit, offset); err == nil {
 		log.Info("Response ", enrollmentsJSON)
 		if jsonArray, err := json.Marshal(enrollmentsJSON["Enrollment"]); err == nil {
 			var listOfEnrollments []*models.Enrollment //todo: we can rename preEnrollment to Enrollment
+=======
+	if enrollmentsJson, err := services.QueryRegistry(typeId, filter, limit, offset); err == nil {
+		log.Info("Response ", enrollmentsJson)
+		enrollmentsJsonArray := enrollmentsJson["Enrollment"]
+		if jsonArray, err := json.Marshal(enrollmentsJsonArray); err == nil {
+			var listOfEnrollments []*models.PreEnrollment //todo: we can rename preEnrollment to Enrollment
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 			err := json.Unmarshal(jsonArray, &listOfEnrollments)
 			if err != nil {
 				log.Errorf("JSON marshalling error for enrollment list %+v", jsonArray)

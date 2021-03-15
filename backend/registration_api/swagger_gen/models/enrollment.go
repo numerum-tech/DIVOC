@@ -33,6 +33,9 @@ type Enrollment struct {
 	// code
 	Code string `json:"code,omitempty"`
 
+	// comorbidities
+	Comorbidities []string `json:"comorbidities"`
+
 	// dob
 	// Format: date
 	Dob strfmt.Date `json:"dob,omitempty"`
@@ -40,10 +43,13 @@ type Enrollment struct {
 	// email
 	Email string `json:"email,omitempty"`
 
+<<<<<<< HEAD
 	// enrollment type
 	// Enum: [SELF_ENRL PRE_ENRL WALK_IN]
 	EnrollmentType string `json:"enrollmentType,omitempty"`
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	// gender
 	// Enum: [Male Female Other]
 	Gender string `json:"gender,omitempty"`
@@ -114,6 +120,10 @@ func (m *Enrollment) validateAddress(formats strfmt.Registry) error {
 }
 
 func (m *Enrollment) validateAppointments(formats strfmt.Registry) error {
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if swag.IsZero(m.Appointments) { // not required
 		return nil
 	}
@@ -323,6 +333,7 @@ type EnrollmentAppointmentsItems0 struct {
 
 	// appointment date
 	// Format: date
+<<<<<<< HEAD
 	AppointmentDate strfmt.Date `json:"appointmentDate"`
 
 	// appointment slot
@@ -330,15 +341,28 @@ type EnrollmentAppointmentsItems0 struct {
 
 	// certified
 	Certified bool `json:"certified"`
+=======
+	AppointmentDate strfmt.Date `json:"appointmentDate,omitempty"`
+
+	// appointment slot
+	AppointmentSlot string `json:"appointmentSlot,omitempty"`
+
+	// certified
+	Certified *bool `json:"certified,omitempty"`
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 	// dose
 	Dose string `json:"dose,omitempty"`
 
 	// enrollment scope Id
+<<<<<<< HEAD
 	EnrollmentScopeID string `json:"enrollmentScopeId"`
 
 	// osid
 	Osid string `json:"osid,omitempty"`
+=======
+	EnrollmentScopeID string `json:"enrollmentScopeId,omitempty"`
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 	// program Id
 	ProgramID string `json:"programId,omitempty"`
@@ -359,6 +383,10 @@ func (m *EnrollmentAppointmentsItems0) Validate(formats strfmt.Registry) error {
 }
 
 func (m *EnrollmentAppointmentsItems0) validateAppointmentDate(formats strfmt.Registry) error {
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if swag.IsZero(m.AppointmentDate) { // not required
 		return nil
 	}
@@ -370,11 +398,14 @@ func (m *EnrollmentAppointmentsItems0) validateAppointmentDate(formats strfmt.Re
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this enrollment appointments items0 based on context it is used
 func (m *EnrollmentAppointmentsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (m *EnrollmentAppointmentsItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {

@@ -1,13 +1,19 @@
 package services
 
 import (
+<<<<<<< HEAD
 	"encoding/json"
 	"github.com/divoc/registration-api/config"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	"strconv"
 	"time"
 
 	"github.com/divoc/kernel_library/services"
+<<<<<<< HEAD
 	"github.com/go-openapi/strfmt"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	log "github.com/sirupsen/logrus"
 )
 
@@ -111,8 +117,13 @@ func convertToProgramWiseDaySchedule(schedules []interface{}) ProgramDaySchedule
 					dayScheduleObj := dayScheduleObj.(map[string]interface{})
 					day := dayScheduleObj["day"].(string)
 					schedule := map[string]string{
+<<<<<<< HEAD
 						"startTime": startTime,
 						"endTime":   endTime,
+=======
+						"startTime":       startTime,
+						"endTime":         endTime,
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 					}
 					if dayScheduleObj["maxAppointments"] != nil {
 						schedule["maxAppointments"] = strconv.Itoa(int(dayScheduleObj["maxAppointments"].(float64)))

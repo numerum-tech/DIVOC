@@ -20,7 +20,11 @@ export const Success = ({ formData, programs}) => {
                     {maskPersonalDetails(formData.contact)}</p>
             </div>
             <div className="pt-3">
+<<<<<<< HEAD
                 <p>On the day of vaccination, please carry your original {getNameOfTheId(getNationalIdType(formData.nationalId))} for verification</p>
+=======
+                <p>On day of vaccination, please carry your original {getNameOfTheId(getNationalIdType(formData.nationalId))}</p>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
             </div>
         </CustomConfirmPage>
     )

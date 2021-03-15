@@ -2,6 +2,12 @@ package services
 
 import (
 	"bytes"
+<<<<<<< HEAD
+=======
+	json "encoding/json"
+	"text/template"
+	"time"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	kernelService "github.com/divoc/kernel_library/services"
 	"github.com/divoc/registration-api/config"
 	models2 "github.com/divoc/registration-api/pkg/models"
@@ -9,7 +15,10 @@ import (
 	"github.com/divoc/registration-api/swagger_gen/models"
 	"github.com/go-openapi/errors"
 	log "github.com/sirupsen/logrus"
+<<<<<<< HEAD
 	"text/template"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 )
 
 func CreateEnrollment(enrollment *models.Enrollment, position int) (string, error) {
@@ -25,6 +34,7 @@ func CreateEnrollment(enrollment *models.Enrollment, position int) (string, erro
 	exists, err := KeyExists(enrollment.Code)
 	if err != nil {
 		return "", err
+<<<<<<< HEAD
 	}
 	if exists == 0 {
 		registryResponse, err := kernelService.CreateNewRegistry(enrollment, "Enrollment")
@@ -34,11 +44,26 @@ func CreateEnrollment(enrollment *models.Enrollment, position int) (string, erro
 		result := registryResponse.Result["Enrollment"].(map[string]interface{})["osid"]
 		return result.(string), nil
 	}
+=======
+	}
+	if exists == 0 {
+		registryResponse, err := kernelService.CreateNewRegistry(enrollment, "Enrollment")
+		if err != nil {
+			return "", err
+		}
+		result := registryResponse.Result["Enrollment"].(map[string]interface{})["osid"]
+		return result.(string), nil
+	}
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	return CreateEnrollment(enrollment, position+1)
 }
 
 func EnrichFacilityDetails(enrollments []map[string]interface{}) {
 	for _, enrollment := range enrollments {
+<<<<<<< HEAD
+=======
+		facilityDetails := make(map[string]interface{})
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 		if enrollment["appointments"] == nil {
 			continue
 		}
@@ -46,11 +71,50 @@ func EnrichFacilityDetails(enrollments []map[string]interface{}) {
 
 		// No appointment means no need to show the facility details
 		for _, appointment := range appointments {
+<<<<<<< HEAD
 			if facilityCode, ok := appointment.(map[string]interface{})["enrollmentScopeId"].(string);
 			ok && facilityCode != "" && len(facilityCode) > 0 {
 				minifiedFacilityDetails := GetMinifiedFacilityDetails(facilityCode)
 				appointment.(map[string]interface{})["facilityDetails"] = minifiedFacilityDetails
+=======
+			facilityCode := appointment.(map[string]interface{})["enrollmentScopeId"]
+			if facilityCode != nil && len(facilityCode.(string)) > 0 {
+				redisKey := facilityCode.(string) + "-info"
+				value, err := GetValue(redisKey)
+				if err := json.Unmarshal([]byte(value), &facilityDetails); err != nil {
+					log.Errorf("Error in marshalling json %+v", err)
+				}
+				if err != nil || len(facilityDetails) == 0 {
+					log.Errorf("Unable to get the value in Cache (%v)", err)
+					filter := map[string]interface{}{}
+					filter["facilityCode"] = map[string]interface{}{
+						"eq": facilityCode,
+					}
+					if responseFromRegistry, err := kernelService.QueryRegistry("Facility", filter, 100, 0); err == nil {
+						facility := responseFromRegistry["Facility"].([]interface{})[0].(map[string]interface{})
+						facilityDetails["facilityName"] = facility["facilityName"]
+						facilityAddress := facility["address"].(map[string]interface{})
+						facilityDetails["state"] = facilityAddress["state"]
+						facilityDetails["pincode"] = facilityAddress["pincode"]
+						facilityDetails["district"] = facilityAddress["district"]
+						appointment.(map[string]interface{})["facilityDetails"] = facilityDetails
+						if facilityDetailsBytes, err := json.Marshal(facilityDetails); err != nil {
+							log.Errorf("Error in Marshaling the facility details %+v", err)
+						} else {
+							err:=SetValue(redisKey, facilityDetailsBytes, time.Duration(config.Config.Redis.CacheTTL))
+							if err != nil {
+								log.Errorf("Unable to set the value in Cache (%v)", err)
+							}
+						}
+					} else {
+						log.Errorf("Error occurred while fetching the details of facility (%v)", err)
+					}
+				} else {
+					appointment.(map[string]interface{})["facilityDetails"] = facilityDetails
+				}
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 			}
+
 		}
 	}
 }
@@ -151,4 +215,7 @@ func NotifyDeletedRecipient(enrollmentCode string, enrollment map[string]string)
 	}
 	return nil
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe

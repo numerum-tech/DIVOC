@@ -6,18 +6,28 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+<<<<<<< HEAD
 	"context"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+<<<<<<< HEAD
 	"github.com/go-openapi/validate"
 )
 
 // NewDeleteAppointmentParams creates a new DeleteAppointmentParams object
 //
 // There are no default values defined in the spec.
+=======
+)
+
+// NewDeleteAppointmentParams creates a new DeleteAppointmentParams object
+// no default values defined in spec.
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 func NewDeleteAppointmentParams() DeleteAppointmentParams {
 
 	return DeleteAppointmentParams{}
@@ -58,11 +68,14 @@ func (o *DeleteAppointmentParams) BindRequest(r *http.Request, route *middleware
 				res = append(res, err)
 			}
 
+<<<<<<< HEAD
 			ctx := validate.WithOperationRequest(context.Background())
 			if err := body.ContextValidate(ctx, route.Formats); err != nil {
 				res = append(res, err)
 			}
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 			if len(res) == 0 {
 				o.Body = body
 			}

@@ -122,6 +122,7 @@ export const Members = () => {
                 dose: member["appointments"][0]["dose"],
             }
         };
+<<<<<<< HEAD
 
         axios.delete("/divoc/api/citizen/appointment", config)
             .then(res => {
@@ -145,6 +146,31 @@ export const Members = () => {
             });
     }
 
+=======
+
+        axios.delete("/divoc/api/citizen/appointment", config)
+            .then(res => {
+                setIsLoading(true);
+                setTimeout(() => {
+                    fetchRecipients();
+                    fetchPrograms()
+                }, 3000);
+
+            })
+            .catch((err) => {
+                if (pathOr("", ["response", "data", "message"], err) !== "") {
+                    alert(err.response.data.message);
+                } else {
+                    alert("Something went wrong. Please try again");
+                }
+            })
+            .finally(() => {
+                setShowModal(false);
+                setSelectedMemberIndex(-1)
+            });
+    }
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
     function callDeleteRecipient() {
         const token = getCookie(CITIZEN_TOKEN_COOKIE_NAME);
         const config = {
@@ -270,11 +296,14 @@ const MemberCard = (props) => {
     // Need to think about the logic to support multiple appointment
     const isAppointmentBooked = !!member["appointments"][0].enrollmentScopeId;
     
+<<<<<<< HEAD
     function getRemainingHours(member) {
         const currentDate = new Date();
         const appointmentDate = new Date(member.appointments[0].appointmentDate + " " + member.appointments[0].appointmentSlot.split("-")[0])
         return (appointmentDate - currentDate) / 1000 / 60 / 60
     }
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
     function getDropdownItems() {
         let items = [
@@ -288,15 +317,23 @@ const MemberCard = (props) => {
             }
         ];
         if (isAppointmentBooked) {
+<<<<<<< HEAD
 
             const isAppointmentCancellationAllowed = getRemainingHours(member) > 24;
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
             items.push({
                 name: "Cancel Appointment",
                 onClick: () => {
                     props.onCancelAppointment()
                 },
+<<<<<<< HEAD
                 disabled: !isAppointmentCancellationAllowed,
                 tooltip: "Cancellation within 24 hours of appointment is not allowed"
+=======
+                disabled: false,
+                tooltip: ""
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
             })
         }
         return items;
@@ -304,7 +341,11 @@ const MemberCard = (props) => {
 
     return (
         <div className="col-xl-6 pt-3">
+<<<<<<< HEAD
             <Card style={{boxShadow: "0px 6px 20px #C1CFD933", border: "1px solid #F8F8F8", height: "100%"}}>
+=======
+            <Card style={{boxShadow: "0px 6px 20px #C1CFD933", border: "1px solid #F8F8F8"}}>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                 <Card.Body style={{fontSize: "14px"}}>
                     <div className="d-flex justify-content-between">
                             <span className="mb-2"

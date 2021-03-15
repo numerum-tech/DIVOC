@@ -6,7 +6,10 @@ package operations
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+<<<<<<< HEAD
 	"context"
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -36,7 +39,11 @@ func NewDeleteRecipient(ctx *middleware.Context, handler DeleteRecipientHandler)
 	return &DeleteRecipient{Context: ctx, Handler: handler}
 }
 
+<<<<<<< HEAD
 /* DeleteRecipient swagger:route DELETE /recipients deleteRecipient
+=======
+/*DeleteRecipient swagger:route DELETE /recipients deleteRecipient
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 Delete the recipient
 
@@ -52,6 +59,10 @@ func (o *DeleteRecipient) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewDeleteRecipientParams()
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,6 +82,10 @@ func (o *DeleteRecipient) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -89,11 +104,14 @@ func (o *DeleteRecipientBadRequestBody) Validate(formats strfmt.Registry) error 
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this delete recipient bad request body based on context it is used
 func (o *DeleteRecipientBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (o *DeleteRecipientBadRequestBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -145,11 +163,14 @@ func (o *DeleteRecipientBody) validateEnrollmentCode(formats strfmt.Registry) er
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this delete recipient body based on context it is used
 func (o *DeleteRecipientBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (o *DeleteRecipientBody) MarshalBinary() ([]byte, error) {
 	if o == nil {

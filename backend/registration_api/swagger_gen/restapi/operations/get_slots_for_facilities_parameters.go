@@ -83,6 +83,10 @@ func (o *GetSlotsForFacilitiesParams) BindRequest(r *http.Request, route *middle
 	if err := o.bindPageSize(qPageSize, qhkPageSize, route.Formats); err != nil {
 		res = append(res, err)
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -140,7 +144,10 @@ func (o *GetSlotsForFacilitiesParams) bindPageSize(rawData []string, hasKey bool
 
 	// Required: false
 	// AllowEmptyValue: false
+<<<<<<< HEAD
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if raw == "" { // empty values pass all other validations
 		// Default values have been previously initialized by NewGetSlotsForFacilitiesParams()
 		return nil

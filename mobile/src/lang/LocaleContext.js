@@ -60,8 +60,13 @@ export function useLocale() {
     }
 }
 
+<<<<<<< HEAD
 export function getMessageComponent(id, defaultMessage, values) {
     return <FormattedMessage id={id} values={values || {}} defaultMessage={defaultMessage || ""}/>
+=======
+export function getMessageComponent(id, defaultMessage) {
+    return <FormattedMessage id={id} defaultMessage={defaultMessage || ""}/>
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 }
 
 export function getNumberComponent(number) {

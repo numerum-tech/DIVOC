@@ -7,9 +7,15 @@
   "app.actionTitle": "Actions",
   "app.recipientDetailsTitle": "Recipient Numbers",
   "app.selectLanguage": "Select Language",
+<<<<<<< HEAD
   "app.verifyRecipient": "Verify Beneficiary",
   "app.enrollRecipient": "New Beneficiary",
   "app.recipientQueue": "Beneficiary Queue",
+=======
+  "app.verifyRecipient": "Verify Recipient",
+  "app.enrollRecipient": "Enroll Recipient",
+  "app.recipientQueue": "Recipient Queue",
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
   "app.recipientWaiting": "Recipient Waiting",
   "app.certificateIssued": "Certificates Issued",
   "app.enterIdentityNumber": "Enter Aadhaar Number",

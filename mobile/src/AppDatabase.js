@@ -57,10 +57,13 @@ export class AppDatabase {
                 if (!objectNames.contains(STASH_DATA)) {
                     database.createObjectStore(STASH_DATA, {keyPath: "userId"});
                 }
+<<<<<<< HEAD
 
                 if (!objectNames.contains(FACILITY_SCHEDULE)) {
                     database.createObjectStore(FACILITY_SCHEDULE);
                 }
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
                 console.log("DB upgraded from " + oldVersion + " to " + newVersion)
             }
         });
@@ -257,6 +260,7 @@ export class AppDatabase {
         return await this.db.getAll(EVENTS) || [];
     }
 
+<<<<<<< HEAD
     async getFacilitySchedule() {
         return this.db.get(FACILITY_SCHEDULE, FACILITY_SCHEDULE);
     }
@@ -266,4 +270,6 @@ export class AppDatabase {
     }
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 export const appIndexDb = new AppDatabase();

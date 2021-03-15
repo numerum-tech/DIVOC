@@ -25,8 +25,13 @@ facility:
     required: "facilityCode,facilityName,contact,addressLine1,addressLine1,district,state,pincode,adminName,adminMobile"
 preenrollment:
   upload:
+<<<<<<< HEAD
     columns: "phone,nationalId,dob,gender,name,email,addressLine1,addressLine2,district,state,pincode"
     required: "phone,nationalId,dob,gender,name,addressLine1,district,state,pincode"
+=======
+    columns: "phone,enrollmentScopeId,nationalId,dob,gender,name,email,addressLine1,addressLine2,district,state,pincode"
+    required: "phone,enrollmentScopeId,nationalId,dob,gender,name,addressLine1,district,state,pincode"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 vaccinator:
   upload:
     columns: "code,name,nationalIdentifier,mobileNumber,email,status,facilityIds"

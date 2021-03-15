@@ -8,6 +8,11 @@ import (
 	"github.com/divoc/portal-api/pkg/utils"
 	"github.com/divoc/portal-api/swagger_gen/models"
 	log "github.com/sirupsen/logrus"
+<<<<<<< HEAD
+=======
+	"strings"
+	"time"
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 )
 
 type CSVMetadata struct {
@@ -89,12 +94,15 @@ func ProcessCSV(baseCsv BaseCSV, data *Scanner) {
 	// start time
 	startTime := time.Now()
 	log.Infof("CSV file ingestion started at %v", startTime)
+<<<<<<< HEAD
 
 	saveErrors := func (errors []string) {
 		log.Error("Error while processing row : ", errors)
 		baseCsv.SaveCsvErrors(errors, csvUploadHistory.ID, false)
 	}
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	for data.Scan() {
 		totalRecords++
 		rowErrors := baseCsv.ValidateRow()

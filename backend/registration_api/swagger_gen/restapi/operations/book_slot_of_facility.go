@@ -36,7 +36,11 @@ func NewBookSlotOfFacility(ctx *middleware.Context, handler BookSlotOfFacilityHa
 	return &BookSlotOfFacility{Context: ctx, Handler: handler}
 }
 
+<<<<<<< HEAD
 /* BookSlotOfFacility swagger:route POST /appointment bookSlotOfFacility
+=======
+/*BookSlotOfFacility swagger:route POST /appointment bookSlotOfFacility
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 Book a slot in facility
 
@@ -65,12 +69,29 @@ func (o *BookSlotOfFacility) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 		principal = uprinc.(*models.JWTClaimBody) // this is really a models.JWTClaimBody, I promise
 	}
 
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		r = aCtx
+	}
+	var principal *models.JWTClaimBody
+	if uprinc != nil {
+		principal = uprinc.(*models.JWTClaimBody) // this is really a models.JWTClaimBody, I promise
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -159,11 +180,14 @@ func (o *BookSlotOfFacilityBody) validateProgramID(formats strfmt.Registry) erro
 	return nil
 }
 
+<<<<<<< HEAD
 // ContextValidate validates this book slot of facility body based on context it is used
 func (o *BookSlotOfFacilityBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
+=======
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 // MarshalBinary interface implementation
 func (o *BookSlotOfFacilityBody) MarshalBinary() ([]byte, error) {
 	if o == nil {

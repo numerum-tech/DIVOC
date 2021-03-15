@@ -80,6 +80,7 @@ func sendForEnrollment(preEnrollmentCsv PreEnrollmentCSV, uploadID uint) error {
 		Yob: int64(dob.Year()),
 		Comorbidities: []string{},
 	}
+<<<<<<< HEAD
 
 	csvUploadErr := preEnrollmentCsv.SaveCsvErrors(nil, uploadID, true)
 	
@@ -92,6 +93,12 @@ func sendForEnrollment(preEnrollmentCsv PreEnrollmentCSV, uploadID uint) error {
 	})
 	if err != nil {
 		return err
+=======
+	_, err := kernelService.CreateNewRegistry(enrollment, "Enrollment")
+	log.Info("Received error response from the create new registry", err)
+	if err != nil && currentRetryCount <= config.Config.EnrollmentCreation.MaxRetryCount {
+		return createPreEnrollmentRegistry(preEnrollmentCsv, currentRetryCount+1)
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	}
 	services.PublishEnrollmentMessage(enrollmentMsg)
 	return nil

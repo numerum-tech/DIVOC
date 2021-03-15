@@ -29,7 +29,11 @@ func NewGetPing(ctx *middleware.Context, handler GetPingHandler) *GetPing {
 	return &GetPing{Context: ctx, Handler: handler}
 }
 
+<<<<<<< HEAD
 /* GetPing swagger:route GET /ping getPing
+=======
+/*GetPing swagger:route GET /ping getPing
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 
 Server heartbeat operation
 
@@ -47,12 +51,20 @@ func (o *GetPing) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewGetPingParams()
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
 	res := o.Handler.Handle(Params) // actually handle the request
+<<<<<<< HEAD
+=======
+
+>>>>>>> d67f4a22968fc0d8f5e31a903c140990031f5bbe
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
