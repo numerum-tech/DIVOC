@@ -620,7 +620,8 @@ func init() {
         "security": [
           {
             "hasRole": [
-              "facility-admin"
+              "facility-admin",
+              "facility-staff"
             ]
           }
         ],
@@ -1440,10 +1441,6 @@ func init() {
               }
             }
           }
-        },
-        "serialNum": {
-          "type": "integer",
-          "title": "Serial Number"
         },
         "stamp": {
           "type": "string"
@@ -2715,7 +2712,8 @@ func init() {
         "security": [
           {
             "hasRole": [
-              "facility-admin"
+              "facility-admin",
+              "facility-staff"
             ]
           }
         ],
@@ -3459,7 +3457,6 @@ func init() {
           "description": "Address line 1",
           "type": "string",
           "title": "The address line 1",
-          "default": "",
           "$id": "#/properties/address/properties/addressLine1"
         },
         "addressLine2": {
@@ -3496,6 +3493,37 @@ func init() {
           "state": "Karnataka"
         }
       ]
+    },
+    "EnrollmentAppointmentsItems0": {
+      "type": "object",
+      "properties": {
+        "appointmentDate": {
+          "type": "string",
+          "format": "date",
+          "x-omitempty": false
+        },
+        "appointmentSlot": {
+          "type": "string",
+          "x-omitempty": false
+        },
+        "certified": {
+          "type": "boolean",
+          "x-omitempty": false
+        },
+        "dose": {
+          "type": "string"
+        },
+        "enrollmentScopeId": {
+          "type": "string",
+          "x-omitempty": false
+        },
+        "osid": {
+          "type": "string"
+        },
+        "programId": {
+          "type": "string"
+        }
+      }
     },
     "Error": {
       "type": "object",
@@ -3571,10 +3599,6 @@ func init() {
           "items": {
             "$ref": "#/definitions/FacilityProgramsItems0"
           }
-        },
-        "serialNum": {
-          "type": "integer",
-          "title": "Serial Number"
         },
         "stamp": {
           "type": "string"
@@ -4321,7 +4345,6 @@ func init() {
               "description": "Address line 1",
               "type": "string",
               "title": "The address line 1",
-              "default": "",
               "$id": "#/properties/address/properties/addressLine1"
             },
             "addressLine2": {
@@ -4359,19 +4382,14 @@ func init() {
             }
           ]
         },
-        "appointmentDate": {
-          "type": "string",
-          "format": "date"
-        },
-        "appointmentSlot": {
-          "type": "string"
+        "appointments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnrollmentAppointmentsItems0"
+          }
         },
         "beneficiaryPhone": {
           "type": "string"
-        },
-        "certified": {
-          "type": "boolean",
-          "default": false
         },
         "code": {
           "type": "string"
@@ -4389,8 +4407,13 @@ func init() {
         "email": {
           "type": "string"
         },
-        "enrollmentScopeId": {
-          "type": "string"
+        "enrollmentType": {
+          "type": "string",
+          "enum": [
+            "SELF_ENRL",
+            "PRE_ENRL",
+            "WALK_IN"
+          ]
         },
         "gender": {
           "type": "string",
@@ -4407,9 +4430,6 @@ func init() {
           "type": "string"
         },
         "phone": {
-          "type": "string"
-        },
-        "programId": {
           "type": "string"
         },
         "yob": {

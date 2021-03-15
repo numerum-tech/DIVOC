@@ -9,14 +9,15 @@ var Config = struct {
 		PublicKey            string `yaml:"publickey" env:"AUTH_PUBLIC_KEY"`
 		PrivateKey           string `yaml:"privatekey" env:"AUTH_PRIVATE_KEY"`
 		TTLForOtp            int    `yaml:"ttlforotpinminutes"`
-		MAXOtpVerifyAttempts int    `yaml:"maxotpverifyattempts"`
-		OTPLength            int    `yaml:"otp_length" env:"OTP_LENGTH" default:"4"`
+		MAXOtpVerifyAttempts int64  `yaml:"maxotpverifyattempts"`
+		OTPLength            int    `yaml:"otp_length" env:"OTP_LENGTH" default:"6"`
 	}
 
 	Kafka struct {
 		BootstrapServers          string `env:"KAFKA_BOOTSTRAP_SERVERS" yaml:"bootstrapservers"`
 		NotifyTopic               string `default:"notify" yaml:"notifyTopic"`
 		EnrollmentTopic           string `default:"enrollment" yaml:"enrollmenttopic"`
+		EnrollmentACKTopic           string `default:"enrollment_ack" yaml:"enrollmentacktopic"`
 		AppointmentAckTopic       string `default:"appointment_ack" yaml:"appointmentacktopic"`
 		RecipientAppointmentTopic string `default:"recipientappointment" yaml:"recipientappointmenttopic"`
 	}
@@ -24,6 +25,7 @@ var Config = struct {
 	EnrollmentCreation struct {
 		MaxRetryCount                  int `default:"10" yaml:"maxretrycount"`
 		LengthOfSuffixedEnrollmentCode int `default:"10" yaml:"lengthofsuffixedenrollmentcode"`
+		MaxEnrollmentCreationAllowed   int `default:"4" yaml:"maxenrollmentcreationallowed"`
 	}
 	Redis struct {
 		Url      string `env:"REDIS_URL" yaml:"redisurl"`
@@ -34,9 +36,10 @@ var Config = struct {
 		ChannelWorkers int `default:"10"`
 		ScheduleDays   int `default:"30"`
 	}
-	MockOtp                      bool `default:"true" env:"MOCK_OTP"`
-	MinCancellationHours         int  `default:"24"`
-	MaxAppointmentUpdatesAllowed int  `default:"3"`
+	MockOtp                      	bool 	`default:"true" env:"MOCK_OTP"`
+	MinCancellationHours         	int  	`default:"24"`
+	MaxAppointmentUpdatesAllowed 	int  	`default:"3"`
+	TimeZoneOffset					string	`default:"+05:30"`
 }{}
 
 func Initialize() {

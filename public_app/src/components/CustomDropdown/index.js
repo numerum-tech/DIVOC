@@ -1,5 +1,5 @@
 import React from "react";
-import {Dropdown} from "react-bootstrap"
+import {Dropdown, OverlayTrigger, Tooltip} from "react-bootstrap"
 
 const CustomToggle = React.forwardRef(({children, onClick}, ref) => (
     <a
@@ -21,10 +21,24 @@ export const CustomDropdown = ({items}) => {
                 <span style={{fontSize: "20px", fontWeight: "bolder"}}>&#8942;</span>
             </Dropdown.Toggle>
 
-            <Dropdown.Menu>
+            <Dropdown.Menu className="d-flex flex-column pr-3">
                 {
                     items.map(item => (
-                        <Dropdown.Item onClick={item.onClick}>{item.name}</Dropdown.Item>
+                        <div className="d-inline-flex align-items-center">
+                            <Dropdown.Item onClick={item.onClick} disabled={item.disabled}>{item.name}</Dropdown.Item>
+                            {item.disabled && item.tooltip !== "" &&
+                            <OverlayTrigger
+                                placement={"bottom"}
+                                overlay={
+                                    <Tooltip id={`tooltip-bottom`}>
+                                        <strong>{item.tooltip}</strong>
+                                    </Tooltip>
+                                }
+                            >
+                                <span className="cursor-pointer">&#9432;</span>
+                            </OverlayTrigger>
+                            }
+                        </div>
                     ))
                 }
             </Dropdown.Menu>

@@ -3,10 +3,11 @@ package services
 import (
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/divoc/registration-api/config"
 	"github.com/divoc/registration-api/pkg/models"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
 var (
@@ -34,15 +35,16 @@ func worker(workerID int, appointmentSchedulerChannel <-chan models.FacilitySche
 }
 
 func AddFacilityScheduleToChannel(serviceReq models.FacilitySchedule) {
+	log.Info("Published the message to channel")
 	appointmentScheduleChannel <- serviceReq
 }
 
 func createFacilityWiseAppointmentSlots(schedule models.FacilitySchedule) {
-	log.Infof("Creating slot for facility %s at time : %s %s", schedule.FacilityCode, schedule.Date, schedule.Time)
+	log.Infof("Creating slot for facility %s at time : %s %s-%s", schedule.FacilityCode, schedule.Date, schedule.StartTime, schedule.EndTime)
 	key := schedule.Key()
-	_, err := AddToSet(schedule.FacilityCode, key, float64(schedule.Date.Unix()))
+	_, err := AddToSet(schedule.FacilityCode, key, float64(schedule.GetStartTimeEpoch()))
 	if err == nil {
-		err = SetValueWithoutExpiry(key, schedule.Slots)
+		err = SetValue(key, schedule.Slots, schedule.GetTTL())
 		if err != nil {
 			log.Errorf("Error while creating key: %s slots: %d %v", key, schedule.Slots, err)
 		}
@@ -52,13 +54,20 @@ func createFacilityWiseAppointmentSlots(schedule models.FacilitySchedule) {
 	}
 }
 
+func ClearOldSlots(facilityCode string, beforeTimeStamp int64) {
+	if e := RemoveElementsByScoreInSet(facilityCode, "-inf", fmt.Sprintf("(%d", beforeTimeStamp)); e != nil {
+		log.Errorf("Error clearing old slots for FacilityCode: %s, timeStamp: %d", facilityCode, beforeTimeStamp)
+	}
+	log.Infof("Clearing old slots for %d[FacilityCode] before %d[epoch]", facilityCode, beforeTimeStamp)
+}
+
 func BookAppointmentSlot(slotId string) error {
 	//TODO: make the below transaction as atomic, use WATCH
 	log.Infof("Blocking appointment slot: %s", slotId)
 	remainingSlotsStr, err := GetValue(slotId)
 	if err != nil {
 		log.Errorf("Failed getting slots info: %s %v", slotId, err)
-		return nil
+		return err
 	}
 	remainingSlots, err := strconv.Atoi(remainingSlotsStr)
 	if remainingSlots <= 0 {

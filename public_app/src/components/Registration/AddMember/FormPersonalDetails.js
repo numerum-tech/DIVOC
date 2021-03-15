@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 import {CustomButton} from "../../CustomButton";
-import Button from "react-bootstrap/Button";
 import state_and_districts from '../../../DummyData/state_and_districts.json';
 import {maskPersonalDetails} from "../../../utils/maskPersonalDetails";
 import axios from "axios";
@@ -12,51 +11,19 @@ import {
     AADHAAR_ERROR_MESSAGE,
     DISTRICT_ERROR_MSG,
     EMAIL_ERROR_MESSAGE,
-    GENDER_ERROR_MSG, INVALID_NAME_ERR_MSG, MINIMUM_LENGTH_OF_NAME_ERROR_MSG,
+    GENDER_ERROR_MSG,
+    INVALID_NAME_ERR_MSG,
+    MAXIMUM_LENGTH_OF_NAME_ERROR_MSG,
+    MINIMUM_LENGTH_OF_NAME_ERROR_MSG,
     NAME_ERROR_MSG,
     NATIONAL_ID_ERROR_MSG,
     NATIONAL_ID_TYPE_ERROR_MSG,
+    PINCODE_ERROR_MESSAGE,
     STATE_ERROR_MSG
 } from "./error-constants";
-import {isAllLetter, isInValidAadhaarNumber} from "../../../utils/validations";
+import {isInValidAadhaarNumber, isValidName, isValidPincode} from "../../../utils/validations";
+import {constuctNationalId, getNationalIdNumber, getNationalIdType, ID_TYPES} from "../../../utils/national-id";
 
-const ID_TYPES = [
-    {
-        "id": "aadhaar",
-        "name": "Aadhaar",
-        "value": "in.gov.uidai.aadhaar"
-    },
-    {
-        "id": "driverLicense",
-        "name": "Driver License",
-        "value": "in.gov.driverlicense"
-    },
-    {
-        "id": "panCard",
-        "name": "Pan Card",
-        "value": "in.gov.pancard"
-    },
-    {
-        "id": "passport",
-        "name": "Passport",
-        "value": "in.gov.passport"
-    },
-    {
-        "id": "healthInsurance",
-        "name": "Health Insurance Smart Card",
-        "value": "in.gov.healthInsurance"
-    },
-    {
-        "id": "mnrega",
-        "name": "MNREGA Job Card",
-        "value": "in.gov.mnrega"
-    },
-    {
-        "id": "id",
-        "name": "Official Identity Card issued to MPs/MLAs",
-        "value": "in.gov.id"
-    }
-];
 // TODO: get state and distict from flagr
 const STATES = Object.values(state_and_districts['states']).map(obj => obj.name);
 
@@ -72,22 +39,13 @@ const RESPONSIVE_ROW_DIV_CLASS = "p-0 pt-2 col-lg-6 col-md-6 col-sm-12";
 export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDetails}) => {
     //"did:in.gov.uidai.aadhaar:11111111111", "did:in.gov.driverlicense:KA53/2323423"
 
-
-    const MANDATORY_FIELDS = [
-        "name",
-        "dob",
-        "state",
-        "district",
-        "gender"
-    ];
-
     const { previous, next } = navigation;
     const [errors, setErrors] = useState({});
 
     function validateUserDetails() {
         const errors = {}
-        const nationalIDType = formData.nationalId.split(":")[1]
-        const nationIDNumber = formData.nationalId.split(":")[2]
+        const nationalIDType = getNationalIdType(formData.nationalId)
+        const nationIDNumber = getNationalIdNumber(formData.nationalId)
 
         if(!nationalIDType) {
             errors.nationalIDType = NATIONAL_ID_TYPE_ERROR_MSG
@@ -104,8 +62,10 @@ export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDeta
             errors.name = NAME_ERROR_MSG
         } else if (formData.name.length < 2){
             errors.name = MINIMUM_LENGTH_OF_NAME_ERROR_MSG
+        } else if (formData.name.length > 99) {
+            errors.name = MAXIMUM_LENGTH_OF_NAME_ERROR_MSG
         } else {
-            if(!isAllLetter(formData.name)) {
+            if(!isValidName(formData.name)) {
                 errors.name = INVALID_NAME_ERR_MSG
             }
         }
@@ -114,6 +74,10 @@ export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDeta
         }
         if(!formData.district) {
             errors.district = DISTRICT_ERROR_MSG
+        }
+
+        if(formData.pincode && !isValidPincode(formData.pincode)) {
+            errors.pincode = PINCODE_ERROR_MESSAGE
         }
 
         if(!formData.gender) {
@@ -142,6 +106,9 @@ export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDeta
         delete dataToSend["state"];
         delete dataToSend["district"];
         delete dataToSend["contact"];
+        delete dataToSend["pincode"];
+        delete dataToSend["locality"];
+        delete dataToSend["programId"]
         dataToSend["yob"] = parseInt(dataToSend["yob"]);
         dataToSend["address"] = {
             "addressLine1": "",
@@ -150,10 +117,17 @@ export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDeta
             "district": "",
             "pincode": ""
         };
+        dataToSend["address"]["addressLine2"] = formData.locality;
         dataToSend["address"]["state"] = formData.state;
         dataToSend["address"]["district"] = formData.district;
+        dataToSend["address"]["pincode"] = formData.pincode;
         dataToSend["phone"] = getUserNumberFromRecipientToken();
         dataToSend["beneficiaryPhone"] = formData.contact
+        // While registering the user, By default user will be assigned to the selected program with dose 1
+        dataToSend["appointments"] = [{
+            "programId": formData.programId,
+            "dose": "1"
+        }]
         const token = getCookie(CITIZEN_TOKEN_COOKIE_NAME);
         const config = {
             headers: {"Authorization": token, "Content-Type": "application/json"},
@@ -171,25 +145,27 @@ export const FormPersonalDetails = ({ setValue, formData, navigation, verifyDeta
     return (
         <Container fluid>
             <div className="side-effect-container">
-                <h3>{verifyDetails ? "Verify beneficiary details" : "Add details to registry beneficiary"}</h3>
+                <h3>{verifyDetails ? "Verify beneficiary details" : "Add details to register beneficiary"}</h3>
                 <div className="shadow-sm bg-white form-container">
                     <IdDetails  verifyDetails={verifyDetails} formData={formData} setValue={setValue} errors={errors}/>
                     <BeneficiaryDetails verifyDetails={verifyDetails} formData={formData} setValue={setValue} errors={errors}/>
                     <ContactInfo verifyDetails={verifyDetails} formData={formData} setValue={setValue} errors={errors}/>
                 </div>
-                <CustomButton isLink={true} type="submit" onClick={previous}>
-                    <span>Back</span>
-                </CustomButton>
-                { !verifyDetails &&
-                <CustomButton className="blue-btn" type="submit" onClick={onContinue}>
-                    <span>Continue &#8594;</span>
-                </CustomButton>
-                }
-                { verifyDetails &&
-                <CustomButton className="blue-btn" type="submit" onClick={onSubmit}>
-                    <span>Confirm</span>
-                </CustomButton>
-                }
+                <div className="pt-3">
+                    <CustomButton isLink={true} type="submit" onClick={previous}>
+                        <span>Back</span>
+                    </CustomButton>
+                    { !verifyDetails &&
+                    <CustomButton className="blue-btn" type="submit" onClick={onContinue}>
+                        <span>Continue &#8594;</span>
+                    </CustomButton>
+                    }
+                    { verifyDetails &&
+                    <CustomButton className="blue-btn" type="submit" onClick={onSubmit}>
+                        <span>Confirm</span>
+                    </CustomButton>
+                    }
+                </div>
             </div>
         </Container>
 
@@ -202,11 +178,11 @@ const ContactInfo = ({verifyDetails, formData, setValue, errors}) => {
 
     return (
         <div className="pt-5">
-            <h5>Contact information for e-certificate</h5>
+            <h5>Contact information for vaccination certificate</h5>
             <Row className="pt-2">
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="mobile">Mobile</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label"} htmlFor="mobile">Mobile</label>
                         { !verifyDetails && <div className="radio-group">
 
                             <div className="pb-2">
@@ -219,13 +195,13 @@ const ContactInfo = ({verifyDetails, formData, setValue, errors}) => {
                         }
                         {
                             verifyDetails &&
-                            <><br/><b>{formData.contact}</b></>
+                            <><br/><p>{formData.contact}</p></>
                         }
                     </Col>
                 </div>
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} hidden={verifyDetails && !formData.email} htmlFor="email">Beneficiary Email ID</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label"} hidden={verifyDetails && !formData.email} htmlFor="email">Beneficiary Email ID</label>
                         <div hidden={verifyDetails}>
                             <input className="form-control" id="email" name="email" type="text"
                                    placeholder="Enter Email ID"
@@ -238,6 +214,9 @@ const ContactInfo = ({verifyDetails, formData, setValue, errors}) => {
                                 <input className="form-control" id="confirmEmail" name="email" type="text"
                                        placeholder="Confirm Email ID"
                                        value={formData.confirmEmail}
+                                       onPaste={(e) => {e.preventDefault()}}
+                                       onDrag={(e) => {e.preventDefault()}}
+                                       onDrop={(e) => {e.preventDefault()}}
                                        onChange={(e) => setValue({target: {name:"confirmEmail", value:e.target.value}})}
                                 />
                             </div>
@@ -247,7 +226,7 @@ const ContactInfo = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <><br/><b>{formData.email}</b></>
+                            <><br/><p>{maskPersonalDetails(formData.email)}</p></>
                         }
                     </Col>
                 </div>
@@ -257,12 +236,9 @@ const ContactInfo = ({verifyDetails, formData, setValue, errors}) => {
 };
 
 const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
-    function constuctNationalId(idtype, idNumber) {
-        return ["did", idtype, idNumber].join(":")
-    }
 
     function getSelectedIdType() {
-        const preSelectedIdValue = formData.nationalId ? formData.nationalId.split(":")[1]: undefined;
+        const preSelectedIdValue = formData.nationalId ? getNationalIdType(formData.nationalId): undefined;
         return preSelectedIdValue ? ID_TYPES.filter(a => a.value === preSelectedIdValue)[0].name: ""
     }
 
@@ -271,15 +247,18 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
             const idValue = event.target.value;
             let existingIdNumber = "";
             if (formData.nationalId) {
-                existingIdNumber = formData.nationalId.split(":")[2] ? formData.nationalId.split(":")[2]: ""
+                const nationalIdNumber = getNationalIdNumber(formData.nationalId);
+                existingIdNumber = nationalIdNumber ? nationalIdNumber: ""
             }
             let nationalId = constuctNationalId(idValue, existingIdNumber)
             setValue({target: {name:"nationalId", value:nationalId}})
         } else if (type === "idNumber") {
             const idNumber = event.target.value;
             let existingIdType = "";
-            if (formData.nationalId)
-                existingIdType = formData.nationalId.split(":")[1] ? formData.nationalId.split(":")[1]: "";
+            if (formData.nationalId) {
+                const nationalIdType = getNationalIdType(formData.nationalId);
+                existingIdType = nationalIdType ? nationalIdType: "";
+            }
             let nationalId = constuctNationalId(existingIdType, idNumber);
             setValue({target: {name:"nationalId", value:nationalId}})
         }
@@ -291,7 +270,7 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
             <Row className="pt-2">
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="idType">ID Type *</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="idType">ID Type </label>
                         <select className="form-control" id="idType"
                                 hidden={verifyDetails}
                                 placeholder="Select ID Type"
@@ -306,17 +285,17 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <b>{getSelectedIdType()}</b>
+                            <p>{getSelectedIdType()}</p>
                         }
                     </Col>
                 </div>
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="idNumber">ID Number *</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="idNumber">ID Number </label>
                         <input className="form-control" id="idNumber"
                                hidden={verifyDetails}
                                type="text" placeholder="Enter ID Number"
-                               defaultValue={formData.nationalId.split(":")[2]}
+                               defaultValue={getNationalIdNumber(formData.nationalId)}
                                onBlur={(e) => onIdChange(e, "idNumber")}/>
                         <div className="invalid-input">
                             {errors.nationalID}
@@ -327,7 +306,7 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <b>{formData.nationalId.split(":")[2]}</b>
+                            <p>{getNationalIdNumber(formData.nationalId)}</p>
                         }
                     </Col>
                 </div>
@@ -335,7 +314,7 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
             <Row className="pt-2">
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="name">Name * (As per ID card)</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="name">Name  (As per ID card)</label>
                         <input className="form-control" name="name" id="name" type="text"
                                hidden={verifyDetails}
                                placeholder="Enter Name"
@@ -346,21 +325,21 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <b>{formData.name}</b>
+                            <p>{formData.name}</p>
                         }
                     </Col>
                 </div>
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="name">Age</label>
-                        <div className={"pl-2" + verifyDetails?" font-weight-bold":""}> {new Date().getFullYear() - formData.yob} Years </div>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label"} htmlFor="name">Age</label>
+                        <div> {new Date().getFullYear() - formData.yob} Years </div>
                     </Col>
                 </div>
             </Row>
             <Row className="pt-2">
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="gender">Gender *</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="gender">Gender </label>
                         <select className="form-control" id="gender" name="gender" onChange={setValue} hidden={verifyDetails}>
                             <option disabled selected={!formData.gender} value>Select Gender</option>
                             {
@@ -369,7 +348,7 @@ const IdDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </select>
                         {
                             verifyDetails &&
-                            <><br/><b>{formData.gender}</b></>
+                            <><br/><p>{formData.gender}</p></>
                         }
                         <div className="invalid-input">
                             {errors.gender}
@@ -415,7 +394,7 @@ const BeneficiaryDetails = ({verifyDetails, formData, setValue, errors}) => {
             <Row className="pt-2">
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="state">State *</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="state">State </label>
                         <select className="form-control" name="state" id="state"
                                 onChange={(e) => onStateSelected(e.target.value)}
                                 hidden={verifyDetails}>
@@ -429,13 +408,13 @@ const BeneficiaryDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <b>{formData.state}</b>
+                            <p>{formData.state}</p>
                         }
                     </Col>
                 </div>
                 <div className={RESPONSIVE_ROW_DIV_CLASS}>
                     <Col className={RESPONSIVE_COL_CLASS}>
-                        <label className={verifyDetails ? "mb-0" : ""} htmlFor="district">District *</label>
+                        <label className={verifyDetails ? "custom-verify-text-label" : "custom-text-label required"} htmlFor="district">District </label>
                         <select className="form-control" id="district" name="district" onChange={setValue} hidden={verifyDetails}>
                             <option disabled selected={!formData.district} value>Select District</option>
                             {
@@ -447,7 +426,45 @@ const BeneficiaryDetails = ({verifyDetails, formData, setValue, errors}) => {
                         </div>
                         {
                             verifyDetails &&
-                            <b>{formData.district}</b>
+                            <p>{formData.district}</p>
+                        }
+                    </Col>
+                </div>
+            </Row>
+            <Row className="pt-2">
+                <div className={RESPONSIVE_ROW_DIV_CLASS}>
+                    <Col className={RESPONSIVE_COL_CLASS}>
+                        <label hidden={verifyDetails && !formData.locality}
+                               className={verifyDetails ? "custom-verify-text-label" : "custom-text-label"}
+                               htmlFor="locality">Locality</label>
+                        <input className="form-control" name="locality" id="locality" type="text"
+                               hidden={verifyDetails}
+                               placeholder="Enter your locality"
+                               defaultValue={formData.locality}
+                               onBlur={setValue}/>
+                        {
+                            verifyDetails &&
+                            <p>{formData.locality}</p>
+                        }
+                    </Col>
+                </div>
+                <div className={RESPONSIVE_ROW_DIV_CLASS}>
+                    <Col className={RESPONSIVE_COL_CLASS}>
+                        <label hidden={verifyDetails && !formData.pincode}
+                               className={verifyDetails ? "custom-verify-text-label" : "custom-text-label"}
+                               htmlFor="pinCode">Pin code</label>
+                        <input className="form-control" name="pincode" id="pinCode" type="text"
+                               hidden={verifyDetails}
+                               placeholder="Enter your pin code"
+                               defaultValue={formData.pincode}
+                               onBlur={setValue}
+                        />
+                        <div className="invalid-input">
+                            {errors.pincode}
+                        </div>
+                        {
+                            verifyDetails &&
+                            <p>{formData.pincode}</p>
                         }
                     </Col>
                 </div>

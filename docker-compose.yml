@@ -1,4 +1,4 @@
-version: "3"
+version: "2.4"
 
 services:
   redis:
@@ -23,30 +23,45 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=registry
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-  registry:
+  registry-es:
     image: dockerhub/registry-es
     environment:
-      - connectionInfo_uri=jdbc:postgresql://db:5432/postgres
+      - connectionInfo_uri=jdbc:postgresql://db:5432/registry
       - connectionInfo_username=postgres
       - connectionInfo_password=postgres
       - elastic_search_connection_url=es:9200
       - search_provider=io.opensaber.registry.service.ElasticSearchService
     #command: java -Xms1024m -Xmx2048m -XX:+UseG1GC -Dserver.port=8081 -jar /home/opensaber/registry.jar
     ports:
+      - "8082:8081"
+    depends_on:
+      es:
+        condition: service_healthy
+      db:
+        condition: service_started
+  registry:
+    image: dockerhub/registry-es
+    environment:
+      - connectionInfo_uri=jdbc:postgresql://db:5432/postgres
+      - connectionInfo_username=postgres
+      - connectionInfo_password=postgres
+    ports:
       - "8081:8081"
     depends_on:
-      - es
-      - db
+      es:
+        condition: service_healthy
+      db:
+        condition: service_started
   keycloak:
     image: dockerhub/keycloak
     environment:
       - DB_VENDOR=postgres
       - DB_ADDR=db
       - DB_PORT=5432
-      - DB_DATABASE=postgres
+      - DB_DATABASE=registry
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - KEYCLOAK_USER=admin
@@ -64,18 +79,20 @@ services:
       - "8080:8080"
       - "9990:9990"
     depends_on:
-      - db
+      db:
+        condition: service_started
   flagr:
     image: checkr/flagr
     environment:
       FLAGR_DB_DBDRIVER: postgres
-      FLAGR_DB_DBCONNECTIONSTR: postgres://postgres:postgres@db:5432/postgres?sslmode=disable
+      FLAGR_DB_DBCONNECTIONSTR: postgres://postgres:postgres@db:5432/registry?sslmode=disable
       HOST: 0.0.0.0
       FLAGR_WEB_PREFIX: /config
     ports:
       - "18000:18000"
     depends_on:
-      - db
+      db:
+        condition: service_started
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     ports:
@@ -86,7 +103,8 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_started
     ports:
       - "9092:9092"
     environment:
@@ -111,28 +129,34 @@ services:
     image: dockerhub/vaccination_api
     environment:
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KEYCLOAK_URL: "http://keycloak:8080/auth"
       DB_HOST: db
     ports:
       - "8000:8000"
     depends_on:
-      - kafka
-      - keycloak
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
   portal_api:
     image: dockerhub/portal_api
     ports:
       - "8001:8001"
     environment:
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       KEYCLOAK_URL: "http://keycloak:8080/auth"
       CLICK_HOUSE_URL: tcp://clickhouse-server:9000?debug=true
       ADMIN_API_CLIENT_SECRET: 8d22dd48-ac11-4d74-b646-a52eaf65861a
       DB_HOST: db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
-      - kafka
-      - keycloak
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
   registration_api:
     image: dockerhub/registration_api
     ports:
@@ -140,6 +164,7 @@ services:
     environment:
       REDIS_URL: redis://redis:6379
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       KEYCLOAK_URL: "http://keycloak:8080/auth"
       DB_HOST: db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -184,29 +209,35 @@ services:
         OQIDAQAB
         -----END PUBLIC KEY-----
     depends_on:
-      - kafka
-      - keycloak
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy  
   analytics_feed:
     image: dockerhub/analytics_feed
     environment:
       CLICK_HOUSE_URL: tcp://clickhouse-server:9000?debug=true
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
-      - clickhouse-server
+      clickhouse-server:
+        condition: service_started
   certificate_processor:
     image: dockerhub/certificate_processor
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       KEYCLOAK_URL: "http://keycloak:8080/auth"
       ADMIN_API_CLIENT_SECRET: 8d22dd48-ac11-4d74-b646-a52eaf65861a
     depends_on:
-      - registry
+      registry:
+        condition: service_started
   certificate_signer:
     image: dockerhub/certificate_signer
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       REDIS_URL: redis://redis:6379
       CERTIFICATE_NAMESPACE: "https://cowin.gov.in/credentials/vaccination/v1"
       CERTIFICATE_CONTROLLER_ID: "https://cowin.gov.in/"
@@ -217,16 +248,21 @@ services:
       CERTIFICATE_FEEDBACK_BASE_URL: "https://cowin.gov.in/?"
       CERTIFICATE_INFO_BASE_URL: "https://cowin.gov.in/?"
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy
   nginx:
     image: dockerhub/nginx
     ports:
       - "81:80"
     depends_on:
-      - vaccination_api
-      - portal_api
-      - registration_api
+      vaccination_api:
+        condition: service_started
+      portal_api:
+        condition: service_started
+      registration_api:
+        condition: service_started
+      digilocker_support_api:
+        condition: service_started
   notification-service:
     image: dockerhub/notification-service
     ports:
@@ -237,11 +273,18 @@ services:
       SENDER_EMAIL: xxxx@mail.com
       SENDER_PASSWORD: xxxx
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
   digilocker_support_api:
     image: dockerhub/digilocker_support_api
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REGISTRY_URL: "http://registry:8081"
+      REGISTRY_WITH_ES_URL: "http://registry-es:8081"
       DIGILOCKER_HMAC_AUTHKEY: "UPDATE_KEY_GIVEN_IN_DIGILOCKER"
       KEYCLOAK_URL: "http://keycloak:8080/auth"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy

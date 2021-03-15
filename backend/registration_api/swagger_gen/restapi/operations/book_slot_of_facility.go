@@ -52,7 +52,6 @@ func (o *BookSlotOfFacility) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 		r = rCtx
 	}
 	var Params = NewBookSlotOfFacilityParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -72,7 +71,6 @@ func (o *BookSlotOfFacility) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -82,6 +80,10 @@ func (o *BookSlotOfFacility) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 // swagger:model BookSlotOfFacilityBody
 type BookSlotOfFacilityBody struct {
 
+	// dose
+	// Required: true
+	Dose *string `json:"dose"`
+
 	// enrollment code
 	// Required: true
 	EnrollmentCode *string `json:"enrollmentCode"`
@@ -89,11 +91,19 @@ type BookSlotOfFacilityBody struct {
 	// facility slot Id
 	// Required: true
 	FacilitySlotID *string `json:"facilitySlotId"`
+
+	// program Id
+	// Required: true
+	ProgramID *string `json:"programId"`
 }
 
 // Validate validates this book slot of facility body
 func (o *BookSlotOfFacilityBody) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := o.validateDose(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := o.validateEnrollmentCode(formats); err != nil {
 		res = append(res, err)
@@ -103,9 +113,22 @@ func (o *BookSlotOfFacilityBody) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := o.validateProgramID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *BookSlotOfFacilityBody) validateDose(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"dose", "body", o.Dose); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -121,6 +144,15 @@ func (o *BookSlotOfFacilityBody) validateEnrollmentCode(formats strfmt.Registry)
 func (o *BookSlotOfFacilityBody) validateFacilitySlotID(formats strfmt.Registry) error {
 
 	if err := validate.Required("body"+"."+"facilitySlotId", "body", o.FacilitySlotID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *BookSlotOfFacilityBody) validateProgramID(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"programId", "body", o.ProgramID); err != nil {
 		return err
 	}
 
